@@ -14,13 +14,13 @@ class Correo(object):
 		msg = MIMEMultipart()
 		lista_mensajes = [
 			(
-				' <strong>Negocios con tipo de documento NULL,</strong>',
-				' <strong>Negocios Duplicados,</strong>',
-				' <strong>Cuotas Duplicadas,</strong>',
+				' <strong>Negocios con tipo de documento NULL</strong>',
+				' <strong>Negocios Duplicados</strong>',
+				' <strong>Cuotas Duplicadas</strong>',
 				' <strong>Cuotas sin Negocio</strong>'
 			),
 			(
-				' <strong>Remesas no estan generadas</strong>'
+				' <strong>, Remesas no estan generadas</strong>'
 			)
 		]
 		# Parametros para enviar correo
