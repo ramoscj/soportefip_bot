@@ -25,9 +25,13 @@ class Correo(object):
 		]
 		# Parametros para enviar correo
 		asunto = 'Revision de DATA para el proceso FIP_EJEC_DIARIO PATRIMONIO: %s y FECHA DE CORTE: %s' % (patrimonio, fecha_corte)
-		password = "Carlos1992"
-		msg['From'] = 'carlos.ramos@imagicair.cl'
-		msg['To'] = 'sop01@imagicair.cl'
+		password = "satelite01"
+		cc = ['axel.riobo@imagicair.cl']
+		bcc = ['carlos.ramos@imagicair.cl']
+		msg['From'] = 'sop01@imagicair.cl'
+		msg['To'] = 'richard.ruiz@adretail.cl'
+		msg['Cc'] = ', '.join(cc)
+		msg['Bcc'] = ', '.join(bcc)
 		msg['Subject'] = asunto
 		envio = datetime.datetime.now()
 		mensaje = '<h2 style="color: #2b2301;">Instrucciones para realizar correcciones de inconsistencias encontradas:</h2>'
@@ -78,10 +82,11 @@ class Correo(object):
 				i += 1
 
 			# Se envia el correo
+			correos = [msg['To'], msg['Cc'], msg['Bcc']]
 			server = smtplib.SMTP('mail.imagicair.cl: 587')
 			server.starttls()
 			server.login(msg['From'], password)
-			server.sendmail(msg['From'], msg['To'], msg.as_string())
+			server.sendmail(msg['From'], correos, msg.as_string())
 			server.quit()
 			return ("%s" % (msg['To']))
 		except Exception as e:
