@@ -40,6 +40,25 @@ class ReportsRev(object):
 		estado = ('NEG_NULL', 'NEG_DUPLICADOS', 'CUO_DUPLICADAS', 'CUO_SNEGOCIO	')
 		return (consultas, estado)
 
+	def consulta_remesas():
+		consultas = (
+			# Reports.consultar_negocios_nulos(),
+			# Reports.consultar_negocios_nulos(),
+			Reports.consultar_remesas(),
+			Reports.consultar_remesas_detalle()
+			)
+		estado = ('Remesas', 'Detalle de Remesas')
+		return (consultas, estado)
+
+	def consulta_neg_remesas():
+		consultas = (
+			Reports.consultar_negocios(),
+			Reports.consultar_negocios_nulos() 
+			# Reports.consultar_remesas()
+			)
+		estado = ('Negocios', 'Remesas')
+		return (consultas, estado)
+
 class RespaldoRev(object):
 
 	def consulta_diario():

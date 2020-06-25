@@ -76,7 +76,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 		# Revision de la data
 		with conexion_db.cursor() as consulta_db:
 			for i in range(0, len(consultas)):
-				await ctx.channel.send('Consultando ' + mensaje[i] + '...')
+				await ctx.channel.send('->Consultando ' + mensaje[i] + '...')
 				consulta_db.execute(consultas[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
 				data.append(consulta_db.fetchone())
 				embed.add_field(name=mensaje[i], value=data[i][0], inline=True)
@@ -94,7 +94,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			consulta_v, mensaje_v = RespaldoRev.validaciones_diario()
 			with conexion_db.cursor() as consulta_db:
 				for i in range(0, len(consulta_v)):
-					await ctx.channel.send('Consultando ' + mensaje_v[i] + '...')
+					await ctx.channel.send('->Consultando ' + mensaje_v[i] + '...')
 					consulta_db.execute(consulta_v[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
 					validaciones.append(consulta_db.fetchone())
 			await ctx.channel.send('Fin de las validaciones')
@@ -135,25 +135,64 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 					respuesta_embed = 'Se envio un correo a la direccion %s con %s archivo .XLSX y %s scripts .SQL con las indicaciones para realizar las correcciones.' % (repuesta, str(archivo_xls), str(archivo_sql))
 				embed.add_field(name='NOTA', value=respuesta_embed, inline=False)
 			elif suma_remesa == 0:
-				recomendado = "Se deben generar las remesas para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
-				embed.add_field(name='Recomendaciones', value=recomendado)
-				embed.title = 'Carga completa pero con inconsistencias encontradas'
+				sum_reports_rem = 0
 				embed.color = discord.Color.dark_gold()
+				embed.title = 'Carga incompleta, inconsistencias encontradas'
+				error = "Las REMESAS NO ESTAN CARGADAS en la interfaz del RESPALDO para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+				recomendado = "Para retomar el proceso se debe ejecutar el ODI para el patrimonio y fecha de corte."
+				consulta_rem, mensaje_rem = ReportsRev.consulta_remesas()
+				remesa_reports = []
+				# Se valida que las remesas esten generadas en el Reports
+				with conexion_db.cursor() as consulta_db:
+					for i in range(0, len(consulta_rem)):
+						await ctx.channel.send('Consultas adicionales...')
+						await ctx.channel.send('..->Consultando Remesas en Reports: ' + mensaje_rem[i] + '...')
+						consulta_db.execute(consulta_rem[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
+						remesa_reports.append(consulta_db.fetchone())
+				sum_reports_rem = sum(i[0] for i in remesa_reports)
+				# Si las remesas no estan en el reports se cambia el mensaje
+				if sum_reports_rem == 0:
+					error = "Las REMESAS NO ESTAN GENERADAS en en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+					recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 3 (tres) para generar las REMESAS (solo para este patrimonio y fecha de corte)."
+				embed.add_field(name='Error encontrado', value=error, inline=False)
+				embed.add_field(name='Recomendaciones', value=recomendado, inline=False)
 		else:
 			await ctx.channel.send('-')
-			descripcion = "Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte)
 			embed = discord.Embed(
 					title='Carga incompleta, inconsistencias encontradas',
 					description=descripcion, 
 					timestamp=datetime.datetime.utcnow(),
 					color=discord.Color.red()
 					)
-			recomendado = "Se debe ejecutar el FIP_WRAP para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte)
-			embed.add_field(name='Recomendaciones', value=recomendado)
+			# Se valida que la informacion este cargada en el Reports
+			consulta_reports, mensaje_reports = ReportsRev.consulta_neg_remesas()
+			data_reports = []
+			await ctx.channel.send('Consultas adicionales...')
+			with conexion_db.cursor() as consulta_db:
+				for i in range(0, len(consulta_reports)):
+					await ctx.channel.send('..->Consultando en Reports: ' + mensaje_reports[i] + '...')
+					consulta_db.execute(consulta_reports[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
+					data_reports.append(consulta_db.fetchone())
+			if data_reports[0][0] == 0 and data_reports[1][0] == 0:
+				error = "Las INFORMACION NO ESTA GENERADA en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+				recomendado = "Para retomar el proceso deb ejecutar el FIP_WRAP OPCION 2 (dos) para generar los NEGOCIOS y luego el FIP_WRAP OPCION 3 (tres) para generar las REMESAS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+			elif data_reports[1][0] == 0:
+				error = "Las REMESAS NO ESTAN GENERADAS en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+				recomendado = "Para retomar el proceso deb ejecutar el FIP_WRAP OPCION 3 (tres) para generar las REMESAS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+			elif data_reports[0][0] == 0:
+				error = "La INFORMACION NO ESTA GENERADA en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+				recomendado = "Para retomar el proceso deb ejecutar el FIP_WRAP OPCION 2 (dos) para generar los NEGOCIOS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+			else:
+				descripcion = "Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte)
+				error = "La INFORMACION NO ESTA CARGADA en la interfaz del RESPALDO para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+				recomendado = "Para retomar el proceso se debe EJECUTAR el ODI para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+
+			embed.add_field(name='Error encontrado', value=error, inline=False)
+			embed.add_field(name='Recomendaciones', value=recomendado, inline=False)
 		await ctx.send(embed=embed)
 	except Exception as e:
 		embed = discord.Embed(
-				title='Error',
+				title='Error no manejado',
 				description='%s' % e,
 				color=discord.Color.dark_red()
 				)
@@ -180,25 +219,5 @@ def test_csv(patrimonio, fecha_corte):
 		row.append(cursor.fetchall())
 	return row
 
-def cronometro():
-	suma=0
-	valor = 10
-	while (suma<=100):
-		if valor == suma:
-			print('segundos:%s' %suma)
-			valor *= 2
-		suma += 10
-		time.sleep(10)
-        # await asyncio.sleep(10)
-
-async def main():
-    # Schedule nested() to run soon concurrently
-    # with "main()".
-    task = asyncio.create_task(cronometro())
-
-    # "task" can now be used to cancel "nested()", or
-    # can simply be awaited to wait until it is complete:
-    await task
-
-bot.run('NzExOTkwMzYxMTY5NDYxMjk4.Xu1A5g.mFk_rBnHv2Z2uq61D4qptisHccI')
+bot.run('NzExOTkwMzYxMTY5NDYxMjk4.XvTpkw.uc8tW1l3HkyV6Nu5xxJTaxoV0Jw')
 
