@@ -26,10 +26,12 @@ class Correo(object):
 		# Parametros para enviar correo
 		asunto = 'Revision de DATA para el proceso FIP_EJEC_DIARIO PATRIMONIO: %s y FECHA DE CORTE: %s' % (patrimonio, fecha_corte)
 		password = "satelite01"
-		cc = ['axel.riobo@imagicair.cl']
+		# cc = ['axel.riobo@imagicair.cl']
+		cc = ['carlos.ramos@imagicair.cl']
 		bcc = ['carlos.ramos@imagicair.cl']
 		msg['From'] = 'sop01@imagicair.cl'
-		msg['To'] = 'richard.ruiz@adretail.cl'
+		# msg['To'] = 'richard.ruiz@adretail.cl'
+		msg['To'] = 'sop01@imagicair.cl'
 		msg['Cc'] = ', '.join(cc)
 		msg['Bcc'] = ', '.join(bcc)
 		msg['Subject'] = asunto
