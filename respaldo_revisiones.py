@@ -53,8 +53,8 @@ class ReportsRev(object):
 	def consulta_neg_remesas():
 		consultas = (
 			Reports.consultar_negocios(),
-			Reports.consultar_negocios_nulos() 
-			# Reports.consultar_remesas()
+			# Reports.consultar_negocios_nulos() 
+			Reports.consultar_remesas()
 			)
 		estado = ('Negocios', 'Remesas')
 		return (consultas, estado)

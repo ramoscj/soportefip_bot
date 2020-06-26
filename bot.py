@@ -175,13 +175,13 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 					data_reports.append(consulta_db.fetchone())
 			if data_reports[0][0] == 0 and data_reports[1][0] == 0:
 				error = "Las INFORMACION NO ESTA GENERADA en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
-				recomendado = "Para retomar el proceso deb ejecutar el FIP_WRAP OPCION 2 (dos) para generar los NEGOCIOS y luego el FIP_WRAP OPCION 3 (tres) para generar las REMESAS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+				recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 2 (dos) para generar los NEGOCIOS y luego el FIP_WRAP OPCION 3 (tres) para generar las REMESAS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 			elif data_reports[1][0] == 0:
 				error = "Las REMESAS NO ESTAN GENERADAS en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
-				recomendado = "Para retomar el proceso deb ejecutar el FIP_WRAP OPCION 3 (tres) para generar las REMESAS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+				recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 3 (tres) para generar las REMESAS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 			elif data_reports[0][0] == 0:
 				error = "La INFORMACION NO ESTA GENERADA en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
-				recomendado = "Para retomar el proceso deb ejecutar el FIP_WRAP OPCION 2 (dos) para generar los NEGOCIOS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+				recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 2 (dos) para generar los NEGOCIOS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 			else:
 				descripcion = "Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte)
 				error = "La INFORMACION NO ESTA CARGADA en la interfaz del RESPALDO para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
