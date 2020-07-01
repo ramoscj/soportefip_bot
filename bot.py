@@ -1,19 +1,19 @@
 import discord
-import datetime, time
-import asyncio
-
 from discord.ext import commands
 
+import datetime, time
+import asyncio
 
 from csv_file import crear_csv, crear_xls
 from script_sql import ScriptSQL
 from enviar_correo import Correo
 
 from acceso_db import conexion
-import cx_Oracle
+from bot_token import TOKEN
 
 from consultas import Reports, Respaldo
-from respaldo_revisiones import ReportsRev, RespaldoRev
+from respaldo_revisiones import RespaldoRev
+from reports_revisiones import ReportsRev
 
 bot = commands.Bot(command_prefix='>')
 
@@ -60,17 +60,21 @@ async def on_command_error(ctx, error):
 @bot.command()
 async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 	data = []
+	nota = False
 	try:
 		conexion_db = conexion()
 		# Se crea el cuadro para dar el resumen de los resultados
 		descripcion = "Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte)
 		embed = discord.Embed(
-				title='Carga correcta y sin inconsistencias encontradas',
-				description=descripcion, 
-				timestamp=datetime.datetime.utcnow(),
-				color=discord.Color.green()
+					title='Carga correcta y sin inconsistencias encontradas',
+					description=descripcion, 
+					timestamp=datetime.datetime.utcnow(),
+					color=discord.Color.green()
 				)
-		# consultas, mensaje= ReportsRev.consulta_diario()
+		embed_nota = discord.Embed(
+					title='NOTA',
+					color=discord.Color.dark_blue()
+				)
 		consultas, mensaje= RespaldoRev.consulta_diario()
 		await ctx.channel.send('Espere mientras se realiza la consulta...')
 		# Revision de la data
@@ -135,15 +139,16 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			elif suma_remesa == 0:
 				sum_reports_rem = 0
 				embed.color = discord.Color.dark_gold()
-				embed.title = 'Carga incompleta, inconsistencias encontradas'
+				embed.title = 'Carga de la información INCOMPLETA'
 				error = "Las REMESAS NO ESTAN CARGADAS en la interfaz del RESPALDO para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 				recomendado = "Para retomar el proceso se debe ejecutar el ODI para el patrimonio y fecha de corte."
+				nota_msj = "Si ya realizo la ejecucion del proceso ODI, espere a que este finalice y luego vuelva a ejecutar la revisión"
 				consulta_rem, mensaje_rem = ReportsRev.consulta_remesas()
 				remesa_reports = []
 				# Se valida que las remesas esten generadas en el Reports
+				await ctx.channel.send('Consultas adicionales en Reports...')
 				with conexion_db.cursor() as consulta_db:
 					for i in range(0, len(consulta_rem)):
-						await ctx.channel.send('Consultas adicionales...')
 						await ctx.channel.send('..->Consultando Remesas en Reports: ' + mensaje_rem[i] + '...')
 						consulta_db.execute(consulta_rem[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
 						remesa_reports.append(consulta_db.fetchone())
@@ -152,12 +157,14 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 				if sum_reports_rem == 0:
 					error = "Las REMESAS NO ESTAN GENERADAS en en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 					recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 3 (tres) para generar las REMESAS (solo para este patrimonio y fecha de corte)."
-				embed.add_field(name='Error encontrado', value=error, inline=False)
-				embed.add_field(name='Recomendaciones', value=recomendado, inline=False)
+					nota_msj = "Los Negocios (%s) ya se encuentran generados en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (str(data[0][0]), patrimonio, fecha_corte)
+				embed.add_field(name='ERROR ENCONTRADO', value=error, inline=False)
+				embed.add_field(name='RECOMENDACIONES', value=recomendado, inline=False)
+				embed.add_field(name='NOTA', value=nota_msj, inline=False)
 		else:
 			await ctx.channel.send('-')
 			embed = discord.Embed(
-					title='Carga incompleta, inconsistencias encontradas',
+					title='Carga de la información para realizar revisón INCOMPLETA',
 					description=descripcion, 
 					timestamp=datetime.datetime.utcnow(),
 					color=discord.Color.red()
@@ -171,22 +178,28 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 					await ctx.channel.send('..->Consultando en Reports: ' + mensaje_reports[i] + '...')
 					consulta_db.execute(consulta_reports[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
 					data_reports.append(consulta_db.fetchone())
-			if data_reports[0][0] == 0 and data_reports[1][0] == 0:
+			negocios_remesas = data_reports[0][0] + data_reports[1][0]
+			negocios_reports = data_reports[0][0]
+			remesas_reports = data_reports[1][0]
+			if  negocios_remesas == 0:
 				error = "Las INFORMACION NO ESTA GENERADA en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 				recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 2 (dos) para generar los NEGOCIOS y luego el FIP_WRAP OPCION 3 (tres) para generar las REMESAS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
-			elif data_reports[1][0] == 0:
+				nota_msj = "Si no tiene el nivel de acceso necesario para ejecutar este proceso contactar con el Supervisor"
+			elif remesas_reports == 0:
 				error = "Las REMESAS NO ESTAN GENERADAS en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 				recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 3 (tres) para generar las REMESAS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
-			elif data_reports[0][0] == 0:
+				nota_msj = "Los Negocios (%s) ya se encuentran generados en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (str(data_reports[0][0]), patrimonio, fecha_corte)
+			elif negocios_reports == 0:
 				error = "La INFORMACION NO ESTA GENERADA en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 				recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 2 (dos) para generar los NEGOCIOS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+				nota_msj = "Las remesas ya se encuentran generados en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 			else:
-				descripcion = "Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte)
 				error = "La INFORMACION NO ESTA CARGADA en la interfaz del RESPALDO para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
 				recomendado = "Para retomar el proceso se debe EJECUTAR el ODI para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
-
-			embed.add_field(name='Error encontrado', value=error, inline=False)
-			embed.add_field(name='Recomendaciones', value=recomendado, inline=False)
+				nota_msj = "La informacion ya se encuentra generada en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
+			embed.add_field(name='ERROR ENCONTRADO', value=error, inline=False)
+			embed.add_field(name='RECOMENDACIONES', value=recomendado, inline=False)
+			embed.add_field(name='NOTA', value=nota_msj, inline=False)
 		await ctx.send(embed=embed)
 	except Exception as e:
 		embed = discord.Embed(
@@ -217,5 +230,5 @@ def test_csv(patrimonio, fecha_corte):
 		row.append(cursor.fetchall())
 	return row
 
-bot.run('NzExOTkwMzYxMTY5NDYxMjk4.XvTpkw.uc8tW1l3HkyV6Nu5xxJTaxoV0Jw')
+bot.run(TOKEN())
 

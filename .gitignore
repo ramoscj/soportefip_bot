@@ -1,2 +1,5 @@
 *.XLSX
 *.sql
+__pycache__/
+scripts/
+csv_data/

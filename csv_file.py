@@ -2,7 +2,8 @@ import csv
 from io import BytesIO
 import xlsxwriter
 
-from respaldo_revisiones import ReportsRev, RespaldoRev
+from respaldo_revisiones import RespaldoRev
+from reports_revisiones import ReportsRev
 from consultas import Respaldo
 
 from acceso_db import conexion
