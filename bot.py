@@ -90,7 +90,6 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			await ctx.channel.send('_')
 			await ctx.channel.send ('Iniciando revision de la DATA:')
 			# Consultas para revision de data
-			# consulta_v, mensaje_v = ReportsRev.validaciones_diario()
 			consulta_v, mensaje_v = RespaldoRev.validaciones_diario()
 			with conexion_db.cursor() as consulta_db:
 				for i in range(0, len(consulta_v)):
@@ -121,7 +120,6 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			total_inconsistencia = sum(i[0] for i in validaciones)
 			if total_inconsistencia > 0:
 				#Archivo con registros que presentan inconsistencia
-				# consulta_xls, mensaje_xls = ReportsRev.detalle_valdiario()
 				consulta_xls, mensaje_xls = RespaldoRev.detalle_valdiario()
 				data_xls = crear_xls(patrimonio, fecha_corte, archivos_adjuntos, consulta_xls, mensaje_xls)
 				if data_xls:
@@ -200,7 +198,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 
 @bot.command()
 async def test(ctx, patrimonio: int, fecha_corte: str):
-	consultas, mensaje= consulta_diario()
+	consultas, mensaje= RespaldoRev.consulta_diario()
 	row = []
 	await ctx.channel.send('Espere mientras se realiza la consulta...')
 	cnx = conexion()

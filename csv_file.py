@@ -22,7 +22,6 @@ def crear_csv(nombre_archivo, registros:[]):
 
 def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
     
-    # Create a workbook and add a worksheet.
     nombre_archivo = 'INCONSISTENCIAS_PAT-%s_FCORT-%s' % (patrimonio, fecha_corte)
     workbook = xlsxwriter.Workbook('csv_data/%s.xlsx' % nombre_archivo)
     conexion_db = conexion()
@@ -44,8 +43,6 @@ def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
     bold2 = workbook.add_format({'bold': True, 'font_name': 'Arial', 'font_size': 10, 'align': 'center', 'valign': 'vcenter', 'locked': True, 'border': 2, 'bg_color': '#FFA500'})
     format_data = workbook.add_format({'font_name': 'Arial', 'font_size': 9, 'align': 'center', 'locked': True, 'border': 1})
 
-    # consultas, mensaje = ReportsRev.detalle_valdiario()
-    # consultas, mensaje = RespaldoRev.detalle_valdiario()
     try:
         for i in range(0, len(revisiones)):
             data = []
