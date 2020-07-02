@@ -30,13 +30,15 @@ def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
         'NEGOCIOS CON TIPO DE DOCUMENTO NULL',
         'NEGOCIOS DUPLICADOS',
         'CUOTAS DUPLICADAS',
-        'CUOTAS SIN NEGOCIO'
+        'CUOTAS SIN NEGOCIO',
+        'NUMERO DE NEGOCIO NULL'
     )
     encabezado = [
         ('COD_PATRIMONIO', 'NUM_CTA_CREDITO', 'COD_CLIENTE', 'COD_EXTRAFIN', 'FECHA_CORTE', 'TIPO_DOCUMENTO'),
         ('COD_PATRIMONIO', 'NUM_CTA_CREDITO', 'COD_CLIENTE', 'COD_EXTRAFIN', 'FECHA_CORTE', 'TIPO_DOCUMENTO'),
         ('COD_PATRIMONIO', 'NUM_CTA_CREDITO', 'COD_CLIENTE', 'COD_EXTRAFIN', 'FECHA_CORTE', 'NUM_CUOTA'),
-        ('COD_PATRIMONIO', 'NUM_CTA_CREDITO', 'COD_CLIENTE', 'COD_EXTRAFIN', 'FECHA_CORTE', 'NUM_CUOTA')
+        ('COD_PATRIMONIO', 'NUM_CTA_CREDITO', 'COD_CLIENTE', 'COD_EXTRAFIN', 'FECHA_CORTE', 'NUM_CUOTA'),
+        ('COD_PATRIMONIO', 'NUM_CTA_CREDITO', 'COD_CLIENTE', 'COD_EXTRAFIN', 'FECHA_CORTE', 'TIPO_DOCUMENTO'),
     ]
     columnas = ('A', 'B', 'C', 'D', 'E', 'F')
 
@@ -76,8 +78,7 @@ def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
         workbook.close()
         return True
     except Exception as e:
-        # return ("Error: archivo .XLS - %s" % (e))
-        raise
+        raise Exception("Error al crear archivo .XLS. Error: %s" % (e))
 
 # print(crear_xls(4, '11062020', [1,1,1,1]))
 

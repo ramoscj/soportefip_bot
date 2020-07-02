@@ -88,6 +88,10 @@ class Respaldo(object):
 		consulta = "select count(1) from fip.fip_diariodet_remesa where patrimonio = :pat_consulta and fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999"
 		return consulta
 
+	def consultar_negociosNull():
+		consulta = "select count(1) from fip.fip_diario_negocios where codigo_patrimonio = :pat_consulta and fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999 and cod_extrafin is null"
+		return consulta
+
 	# CONSULTAS PARA VALIDAR ERRORES *********************************
 
 	def consultar_negocios_nulos():
@@ -121,7 +125,12 @@ class Respaldo(object):
 	def detalle_cuotas_snegocio():
 		consulta = "select  fdc.codigo_patrimonio, fdc.num_cta_credito, fdc.cod_cliente, fdc.cod_extrafin, fdc.fecha_corte, nvl(fdc.num_cuota, 0) from fip.fip_diario_cuotanegocios fdc where fdc.fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') and fdc.codigo_patrimonio = :pat_consulta and not exists (select 1 from fip.fip_diario_negocios fdn where fdn.num_cta_credito = fdc.num_cta_credito and fdn.cod_cliente = fdc.cod_cliente and fdn.cod_extrafin = fdc.cod_extrafin and fdn.cod_empresa = fdc.cod_empresa and fdn.fecha_corte = fdc.fecha_corte and fdn.codigo_patrimonio = fdc.codigo_patrimonio)"
 		return consulta
+	
+	def detalle_negociosNull():
+		consulta = "select codigo_patrimonio, num_cta_credito, cod_cliente, cod_extrafin, fecha_corte, nvl(tipo_documento, 'NULL') from fip.fip_diario_negocios where codigo_patrimonio = :pat_consulta and fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999 and cod_extrafin is null"
+		return consulta
 
+	# CONSULTAS PARA PRUEBAS
 	def consultar_remesas_cantidad():
 		consulta = "select nro_remesa, patrimonio, tipo_movimiento, num_cta_credito, cod_cliente, org_code from fip.fip_diariodet_remesa where patrimonio = :pat_consulta and fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999 and ROWNUM <= 20"
 		return consulta

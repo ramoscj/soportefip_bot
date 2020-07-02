@@ -1,5 +1,12 @@
 *.XLSX
+*.tsql
 *.sql
 __pycache__/
 scripts/
 csv_data/
+__pycache__/respaldo_revisiones.cpython-37.pyc
+__pycache__/enviar_correo.cpython-37.pyc
+__pycache__/csv_file.cpython-37.pyc
+__pycache__/consultas.cpython-37.pyc
+__pycache__/acceso_db.cpython-37.pyc
+*.xlsx

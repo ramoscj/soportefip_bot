@@ -20,9 +20,10 @@ class RespaldoRev(object):
 			Respaldo.consultar_negocios_nulos(),
 			Respaldo.consultar_negocios_duplicados(),
 			Respaldo.consultar_cuotas_duplicadas(),
-			Respaldo.consultar_cuotas_snegocios()
+			Respaldo.consultar_cuotas_snegocios(),
+			Respaldo.consultar_negociosNull()
 		)
-		estado = ('Negocios con tipo de documento NULL', 'Negocios duplicados', 'Cuotas duplicadas', 'Cuotas sin Negocio')
+		estado = ('Negocios con tipo de documento NULL', 'Negocios duplicados', 'Cuotas duplicadas', 'Cuotas sin Negocio', 'Numero de Negocio NULL')
 		return (consultas, estado)
 
 	def detalle_valdiario():
@@ -30,11 +31,12 @@ class RespaldoRev(object):
 			Respaldo.detalle_negocios_null(),
 			Respaldo.detalle_negocios_duplicados(),
 			Respaldo.detalle_cuotas_cuplicadas(),
-			Respaldo.detalle_cuotas_snegocio()
+			Respaldo.detalle_cuotas_snegocio(),
+			Respaldo.detalle_negociosNull()
 			# Respaldo.consultar_remesas_cantidad(),
 			# Respaldo.consultar_remesas_cantidad(),
 			# Respaldo.consultar_remesas_cantidad(),
 			# Respaldo.consultar_remesas_cantidad()
 		)
-		estado = ('NEG_NULL', 'NEG_DUPLICADOS', 'CUO_DUPLICADAS', 'CUO_SNEGOCIO	')
+		estado = ('NEG_NULL', 'NEG_DUPLICADOS', 'CUO_DUPLICADAS', 'CUO_SNEGOCIO', 'NRO_NEGNULL')
 		return (consultas, estado)
