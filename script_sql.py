@@ -7,7 +7,8 @@ class ScriptSQL(object):
                 ScriptSQL.sql_negocios_null(cantidad),
                 ScriptSQL.sql_negocios_duplicados(cantidad, patrimonio, fecha_corte),
                 ScriptSQL.sql_cuotas_duplicadas(cantidad, patrimonio, fecha_corte),
-                ScriptSQL.sql_cuotas_snegocio(cantidad, patrimonio, fecha_corte)
+                ScriptSQL.sql_cuotas_snegocio(cantidad, patrimonio, fecha_corte),
+                ScriptSQL.sql_nroneg_null(cantidad, patrimonio, fecha_corte)
                 )
             texto = lista_sql[archivo]
             with open(archivo_path, "w") as archivo:
@@ -83,6 +84,30 @@ class ScriptSQL(object):
                     "             AND FDN.COD_EMPRESA = FDC.COD_EMPRESA\n"
                     "             AND FDN.FECHA_CORTE = FDC.FECHA_CORTE\n"
                     "             AND FDN.CODIGO_PATRIMONIO = FDC.CODIGO_PATRIMONIO);\n"
+                    "COMMIT;\n"
+            ]
+        return texto_sql
+    
+    def sql_nroneg_null(cantidad, pat, fecha_corte):
+        texto_sql = [
+                    "DELETE\n"
+                    "    FROM FIP.FIP_DIARIO_CUOTANEGOCIOS FDC\n"
+                    "    WHERE\n"
+                    "     (FDC.NUM_CTA_CREDITO, FDC.COD_CLIENTE, nvl(FDC.COD_EXTRAFIN,0), FDC.COD_EMPRESA, FDC.FECHA_CORTE, FDC.CODIGO_PATRIMONIO) in (\n"
+                    "        SELECT FDN.NUM_CTA_CREDITO, FDN.COD_CLIENTE, nvl(FDN.COD_EXTRAFIN,0), FDN.COD_EMPRESA, FDN.FECHA_CORTE, FDN.CODIGO_PATRIMONIO\n"
+                    "            FROM FIP.FIP_DIARIO_NEGOCIOS FDN\n"
+                    "            WHERE FDN.FECHA_CORTE = TO_DATE('"+ fecha_corte + "', 'ddmmyyyy')\n"
+                    "            AND FDN.CODIGO_PATRIMONIO = "+ str(pat) + "\n"
+                    "            and FDN.cod_extrafin is null\n"
+                    "     )\n"
+                    "     and FDC.FECHA_CORTE = TO_DATE('"+ fecha_corte + "', 'ddmmyyyy')\n"
+                    "     and FDC.CODIGO_PATRIMONIO = "+ str(pat) + ";\n"
+                    "-- "+ str(cantidad) + " NUMERO DE NEGOCIO NULL\n"
+                    "DELETE\n"
+                    "FROM FIP.FIP_DIARIO_NEGOCIOS FN\n"
+                    "       WHERE FN.FECHA_CORTE = TO_DATE('"+ fecha_corte + "', 'ddmmyyyy')\n"
+                    "         AND FN.CODIGO_PATRIMONIO = "+ str(pat) + "\n"
+                    "         and fn.cod_extrafin is null;\n"
                     "COMMIT;\n"
             ]
         return texto_sql
