@@ -3,6 +3,7 @@ import subprocess
 # completed = subprocess.call('echo $PATH', shell=True)
 # print('returncode:', completed)
 
-cp = subprocess.run(["dir"],shell=True)
+cp = subprocess.run(["mkdir", "prueba"],shell=True)
 
-print(cp.returncode)
+if cp.returncode:
+    print(cp.returncode)

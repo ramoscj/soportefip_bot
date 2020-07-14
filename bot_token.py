@@ -1,8 +1,8 @@
 import platform
 
 def TOKEN():
-    sistema = platform.system()
-    if sistema == 'Windows':
+    sistema = platform.platform()
+    if sistema.startswith('Windows-10'):
         # Desarrollo
         token = 'NzI3OTExMzA2Mjg3MzgyNjU4.Xvy-GA.V1I7jAtOvunlD9I2_J-DZyDRGcg'
     else:

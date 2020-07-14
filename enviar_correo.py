@@ -30,8 +30,8 @@ class Correo(object):
 		# Parametros para enviar correo
 		asunto = 'Revision de DATA para el proceso FIP_EJEC_DIARIO PATRIMONIO: %s FECHA DE CORTE: %s' % (patrimonio, fecha_corte)
 		password = "satelite01"
-		sistema = platform.system()
-		if sistema == 'Windows':
+		sistema = platform.platform()
+		if sistema.startswith('Windows-10'):
 			cc = ['carlos.ramos@imagicair.cl']
 			msg['To'] = 'sop01@imagicair.cl'
 		else:
