@@ -237,7 +237,14 @@ async def vpn_active(ctx):
 		await ctx.send('Conectado: %s' % cp)
 	except Exception as e:
 		raise e
-	
+
+@bot.command()
+async def vpnActiveLinux(ctx):
+	try:
+		cp = subprocess.run(['sh /home/somarcj/Documents/my_key.sh'], shell=True)
+		await ctx.send('Conectado: %s' % cp)
+	except Exception as e:
+		raise e
 
 bot.run(TOKEN())
 
