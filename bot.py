@@ -3,6 +3,7 @@ from discord.ext import commands
 
 import datetime, time
 import asyncio
+import subprocess
 
 from csv_file import crear_csv, crear_xls
 from script_sql import ScriptSQL
@@ -227,13 +228,16 @@ async def test(ctx, patrimonio: int, fecha_corte: str):
 			await ctx.channel.send('Consultando ' + mensaje[i] + '...')
 	print(sum(i[0] for i in row))
 
-def test_csv(patrimonio, fecha_corte):
-	row = []
-	cnx = conexion()
-	with cnx.cursor() as cursor:
-		cursor.execute(Respaldo.consultar_remesas_cantidad(), pat_consulta=patrimonio, fecha_consulta=fecha_corte)
-		row.append(cursor.fetchall())
-	return row
+@bot.command()
+async def vpn_active(ctx):
+	try:
+		programa = 'vpncli.exe'
+		parametros = 'my_key.dat'
+		cp = subprocess.run(['C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\%s' % programa, '-s', '<', '..\..\%s' % parametros], shell=True)
+		await ctx.send('Conectado: %s' % cp)
+	except Exception as e:
+		raise e
+	
 
 bot.run(TOKEN())
 
