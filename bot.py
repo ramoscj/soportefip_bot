@@ -241,10 +241,10 @@ async def vpn_active(ctx):
 @bot.command()
 async def vpnActiveLinux(ctx):
 	try:
-		cp = subprocess.run(['sh /home/somarcj/Documents/my_key.sh'], shell=True)
-		await ctx.send('Conectado: %s' % cp)
+		cp = subprocess.run(['sh','/home/ubuntu/config_vpn/vpn_cisco/my_key.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		await ctx.send('Conectando VPN: %s - %s' % (cp.stdout, cp.stderr))
 	except Exception as e:
-		raise e
+		await ctx.send('Error VPN: %s' % e)
 
 bot.run(TOKEN())
 
