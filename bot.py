@@ -233,8 +233,8 @@ async def vpn_active(ctx):
 	try:
 		programa = 'vpncli.exe'
 		parametros = 'my_key.dat'
-		cp = subprocess.run(['C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\%s' % programa, '-s', '<', '..\..\%s' % parametros], shell=True)
-		await ctx.send('Conectado: %s' % cp)
+		cp = subprocess.run(['C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\%s' % programa, '-s', '<', '..\..\%s' % parametros], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		await ctx.send('Conectando VPN: %s - %s' % (cp.stdout, cp.stderr))
 	except Exception as e:
 		raise e
 
