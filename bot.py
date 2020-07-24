@@ -241,8 +241,16 @@ async def vpn_active(ctx):
 @bot.command()
 async def vpnActiveLinux(ctx):
 	try:
-		cp = subprocess.run(['sh','/home/ubuntu/config_vpn/vpn_cisco/my_key.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		cp = subprocess.run(['bash','/usr/bin/vpn_up.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		await ctx.send('Conectando VPN: %s - %s' % (cp.stdout, cp.stderr))
+	except Exception as e:
+		await ctx.send('Error VPN: %s' % e)
+
+@bot.command()
+async def vpnDeactiveLinux(ctx):
+	try:
+		cp = subprocess.run(['bash','/usr/bin/vpn_down.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		await ctx.send('Desconectando VPN: %s - %s' % (cp.stdout, cp.stderr))
 	except Exception as e:
 		await ctx.send('Error VPN: %s' % e)
 
