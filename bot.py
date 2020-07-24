@@ -254,5 +254,13 @@ async def vpnDeactiveLinux(ctx):
 	except Exception as e:
 		await ctx.send('Error VPN: %s' % e)
 
+@bot.command()
+async def activarBOT(ctx):
+	try:
+		cp = subprocess.run(['python3.7','/home/ubuntu/bot/soportefip_bot/bot.py', '&'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		await ctx.send('Desconectando VPN: %s - %s' % (cp.stdout, cp.stderr))
+	except Exception as e:
+		await ctx.send('Error VPN: %s' % e)
+
 bot.run(TOKEN())
 
