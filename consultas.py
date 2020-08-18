@@ -195,4 +195,4 @@ class Respaldo(object):
 		consulta = "select count(1) from %s.fip_diariodet_remesa%s where patrimonio = :pat_consulta and fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999" % (entorno, dblink)
 		return consulta
 
-# print(Respaldo.consultar_mov_sincuotasV006('reports', '@kamet.din.cl'))
+# print(Respaldo.consultarNegocios('reports', '@kamet.din.cl'))

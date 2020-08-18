@@ -89,7 +89,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 				resultado = consulta_db.fetchone()
 				if resultado[0] > 0:
 					registrosRespaldo.append(resultado[0])
-				embed.add_field(name= mensaje[i], value= registrosRespaldo[i], inline= True)
+					embed.add_field(name= mensaje[i], value= resultado[0], inline= True)
 
 		if len(registrosRespaldo) == 6:
 			erroresEncontrados = []
@@ -142,7 +142,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			embed.title = 'Carga de la información para realizar revisón INCOMPLETA'
 			embed.color = discord.Color.red()
 			# Consultas SQL y texto para seguimiento
-			consulta_reports, mensaje_reports = RespaldoRev.consulta_neg_remesas('reports', dblink)
+			consulta_reports, mensaje_reports = RespaldoRev.consulta_neg_remesas('reports', dblink_reports)
 			data_reports = []
 			# Se valida que la informacion este cargada en el Reports
 			await ctx.channel.send('Consultas adicionales...')
