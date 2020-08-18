@@ -23,12 +23,12 @@ class RespaldoRev(object):
 			Respaldo.validarCuotasDuplicadas(entorno, dblink),
 			Respaldo.validarCuotasSinNegocio(entorno, dblink),
 			Respaldo.validarNroNegociosNull(entorno, dblink),
-			# Respaldo.validarMovSinCuotaExtra(entorno, dblink),
-			Respaldo.count_remesas(entorno, dblink),
+			Respaldo.validarMovSinCuotaExtra(entorno, dblink),
+			# Respaldo.count_remesas(entorno, dblink),
 			Respaldo.validarMovSinCuota(entorno, dblink),
 			Respaldo.validarClienteDuplicadoTc(),
-			# Respaldo.validarCuentasMigradasDuplicadas()
-			Respaldo.count_remesas(entorno, dblink)
+			Respaldo.validarCuentasMigradasDuplicadas()
+			# Respaldo.count_remesas(entorno, dblink)
 		)
 		estado = ('Negocios con tipo de documento NULL', 'Negocios duplicados', 'Cuotas duplicadas', 'Cuotas sin Negocio', 'Numero de Negocio NULL', 'Movimientos sin cuotas Extrafin', 'Movimientos sin cuotas', 'Clientes duplicados en TC', 'Cuentas Migradas Duplicadas')
 		return (consultas, estado)
@@ -65,7 +65,3 @@ class RespaldoRev(object):
 			)
 		estado = ('Negocios', 'Remesas')
 		return (consultas, estado)
-
-# x, k = RespaldoRev.detalle_valdiario('fip', '')
-# for y in x[7]:
-# 	print(y)
