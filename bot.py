@@ -200,8 +200,6 @@ async def vpnActiveLinux(ctx):
 	try:
 		cp = subprocess.run('sudo bash /usr/bin/start_vpn.sh', shell=True)
 		await ctx.channel('Conectando VPN: %s' % cp.returncode)
-		conexionDB = conexion()
-		await ctx.send('Conexion con DB: %s OK' % str(conexionDB))
 	except Exception as e:
 		await ctx.send('Error VPN: %s' % e)
 
