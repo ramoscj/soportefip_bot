@@ -11,16 +11,17 @@ import datetime
  
 class Correo(object):
 
-	def enviar(lista_archivos:[], patrimonio, fecha_corte, remesa_generada:int):
+	def enviar(lista_archivos:[], patrimonio, fecha_corte):
 		msg = MIMEMultipart()
-		print(lista_archivos)
 		lista_mensajes = [
 			(
 				'<strong>Negocios con tipo de documento NULL</strong>',
 				'<strong>Negocios Duplicados</strong>',
 				'<strong>Cuotas Duplicadas</strong>',
 				'<strong>Cuotas sin Negocio</strong>',
-				'<strong>Numero de Negocio en NULL</strong>'
+				'<strong>Numero de Negocio en NULL</strong>',
+				'<strong>Movimientos ExtraFin sin Cuotas</strong>',
+				'<strong>Movimientos sin Cuotas</strong>'
 			),
 			(
 				'<strong>Remesas no estan generadas en la interfaz del Reports</strong>',
@@ -46,20 +47,21 @@ class Correo(object):
 		mensaje += '<ol style="line-height: 32px; list-style-type: square;">'
 		for errores_encontrados in lista_archivos:
 			mensaje += '<li style="clear: both;">%s</li>' % lista_mensajes[0][errores_encontrados]
-		if remesa_generada == 2:
-			mensaje += '<li style="clear: both;">%s</li>' % lista_mensajes[1][0]
-		elif remesa_generada == 1:
-			mensaje += '<li style="clear: both;">%s</li>' % lista_mensajes[1][1]
+		# if remesa_generada == 2:
+		# 	mensaje += '<li style="clear: both;">%s</li>' % lista_mensajes[1][0]
+		# elif remesa_generada == 1:
+		# 	mensaje += '<li style="clear: both;">%s</li>' % lista_mensajes[1][1]
 		mensaje += '</ol></p>'
 		mensaje += '<h3 style="color: #2b2301;">Para corregir las inconsistencia se recomienda:</h3>'
 		mensaje += '<ol style="line-height: 32px;">'
-		if remesa_generada == 2:
-			mensaje += '<li style="clear: both;">Generar remesas con el FIP_WRAP opcion 3 (para el patrimonio y fecha de corte)</li>'
-			mensaje += '<li style="clear: both;">Ejecutar el ODI para el patrimonio y fecha de corte. Esperar a que finalice</li>'
-		elif remesa_generada == 1:
-			mensaje += '<li style="clear: both;">Ejecutar el ODI para el patrimonio y fecha de corte. Esperar a que finalice</li>'
+		# if remesa_generada == 2:
+		# 	mensaje += '<li style="clear: both;">Generar remesas con el FIP_WRAP opcion 3 (para el patrimonio y fecha de corte)</li>'
+		# 	mensaje += '<li style="clear: both;">Ejecutar el ODI para el patrimonio y fecha de corte. Esperar a que finalice</li>'
+		# elif remesa_generada == 1:
+		# 	mensaje += '<li style="clear: both;">Ejecutar el ODI para el patrimonio y fecha de corte. Esperar a que finalice</li>'
 		mensaje += '<li style="clear: both;">Ejecutar los scripts .SQL enviados en orden.</li>'
-		mensaje += '<li style="clear: both;">Iniciar con el proceso diario</li></ol>'
+		mensaje += '<li style="clear: both;">Ralizar nuevamente la revisión para confirmar que no existan errores.</li>'
+		mensaje += '<li style="clear: both;">Iniciar con el proceso diario.</li></ol>'
 		mensaje += '<p><strong>&nbsp;</strong></p>'
 		mensaje += '<p><strong>Nota: </strong>Si tiene alguna duda con las  indicaciones enviadas por favor enviar un correo electronico a la direccion: <strong>sop01@imagicair.cl</strong><br/></p>'
 		mensaje += '<p><strong>Enviado: </strong> %s</p>' % (envio.strftime("%b %d %Y %H:%M"))
@@ -74,6 +76,8 @@ class Correo(object):
 				'cuotas_duplicadas_PAT-%s_FCORTE-%s' % (patrimonio, fecha_corte),
 				'cuotas_sin_negocio_PAT-%s_FCORTE-%s' % (patrimonio, fecha_corte),
 				'numero_negNULL_PAT-%s_FCORTE-%s' % (patrimonio, fecha_corte),
+				'movExtrafin_scuota_PAT-%s_FCORTE-%s' % (patrimonio, fecha_corte),
+				'movimiento_scuota_PAT-%s_FCORTE-%s' % (patrimonio, fecha_corte)
 				)
 			nombre_archivo = 'INCONSISTENCIAS_PAT-%s_FCORT-%s' % (patrimonio, fecha_corte)
 			archivo_path = 'csv_data/%s.xlsx' % (nombre_archivo)

@@ -17,6 +17,8 @@ from consultas import Reports, Respaldo
 from respaldo_revisiones import RespaldoRev
 from reports_revisiones import ReportsRev
 
+from config_bot import PATRIMONIOS_TC, ENTORNO_FIP, ENTORNO_REPORTS
+
 bot = commands.Bot(command_prefix='>')
 
 @bot.event
@@ -61,129 +63,90 @@ async def on_command_error(ctx, error):
 
 @bot.command()
 async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
-	data = []
+	registrosRespaldo = []
 	nota = False
+	await ctx.channel.send('Iniciando proceso -> PATRIMONIO: %s FECHA_CORTE: %s, porfavor espere...' % (patrimonio, fecha_corte))
 	try:
-		conexion_db = conexion()
+		conexionDB = conexion()
+		totalRegistrosRespaldo = 0
+		entorno = ENTORNO_FIP['DB']
+		dblink = ENTORNO_FIP['DBLINK']
 		# Se crea el cuadro para dar el resumen de los resultados
-		descripcion = "Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte)
 		embed = discord.Embed(
 					title='Carga correcta y sin inconsistencias encontradas',
-					description=descripcion, 
+					description="Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte), 
 					timestamp=datetime.datetime.utcnow(),
 					color=discord.Color.green()
 				)
 		# Consultas SQL y texto para seguimiento
-		consultas, mensaje= RespaldoRev.consulta_diario()
-		await ctx.channel.send('Espere mientras se realiza la consulta...')
+		consultaDiario, mensaje = RespaldoRev.consulta_diario(entorno, dblink)
+		await ctx.channel.send('Iniciando las consultas DB: %s' % str(conexionDB))
 		# Revision para el aptrimonio y fecha de corte
-		with conexion_db.cursor() as consulta_db:
-			for i in range(0, len(consultas)):
+		with conexionDB.cursor() as consulta_db:
+			for i in range(0, len(consultaDiario)):
 				await ctx.channel.send('->Consultando ' + mensaje[i] + '...')
-				consulta_db.execute(consultas[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
-				data.append(consulta_db.fetchone())
-				embed.add_field(name=mensaje[i], value=data[i][0], inline=True)
-		# Revision si existen registros
-		total_registros = sum(data[i][0] for i in range(0,len(data)))
-		if total_registros > 0:
-			validaciones = []
-			remesa_generada = 0
-			suma_remesa = data[4][0] + data[5][0]
+				consulta_db.execute(consultaDiario[i], pat_consulta= patrimonio, fecha_consulta= fecha_corte)
+				resultado = consulta_db.fetchone()
+				if resultado[0] > 0:
+					registrosRespaldo.append(resultado[0])
+				embed.add_field(name= mensaje[i], value= registrosRespaldo[i], inline= True)
+
+		if len(registrosRespaldo) == 6:
+			erroresEncontrados = []
 			await ctx.channel.send('Existen registros para el patrimonio: ' + str(patrimonio) + ' fecha de corte: ' + fecha_corte)
 			await ctx.channel.send('_')
 			await ctx.channel.send ('Iniciando revision de la DATA:')
 			# Consultas SQL y texto para seguimiento
-			consulta_v, mensaje_v = RespaldoRev.validaciones_diario()
-			with conexion_db.cursor() as consulta_db:
-				for i in range(0, len(consulta_v)):
-					await ctx.channel.send('->Consultando ' + mensaje_v[i] + '...')
-					consulta_db.execute(consulta_v[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
-					validaciones.append(consulta_db.fetchone())
+			consultaValidarCarga, mensajeValidacion = RespaldoRev.validaciones_diario(entorno, dblink)
+			with conexionDB.cursor() as consulta_db:
+				for i in range(0, len(consultaValidarCarga)):
+					await ctx.channel.send('->Consultando ' + mensajeValidacion[i] + '...')
+					if i == 7:
+						patTC = PATRIMONIOS_TC.get(patrimonio)
+						consulta_db.execute(consultaValidarCarga[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte, pat_consultatc= patTC)
+					else:
+						consulta_db.execute(consultaValidarCarga[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
+					resultado = consulta_db.fetchone()
+					erroresEncontrados.append(resultado[0])
 			await ctx.channel.send('Fin de las validaciones')
 			await ctx.channel.send('_')
-			# Se valida que las remesas esten generadas en el Respaldo
-			if  suma_remesa == 0:
-				remesa_generada = 1
-			validaciones2 = [(1,),(1,),(1,),(1,),(1,)]
-			archivos_adjuntos = []
+			# erroresEncontrados = [(1,),(1,),(1,),(1,),(1,)]
+			archivoSqlAdjunto = []
 			archivo_sql = 0
 			archivo_xls = 0
 			# Bloque para agregar las inconsistencias a la salida por pantalla
-			for i in range(0, len(validaciones)):
-				if validaciones[i][0] > 0:
-					embed.add_field(name=mensaje_v[i], value=str(validaciones[i][0]), inline=False)
+			for i in range(0, len(erroresEncontrados)):
+				if erroresEncontrados[i] > 0:
+					embed.add_field(name= mensajeValidacion[i], value= str(erroresEncontrados[i]), inline= False)
 					embed.title = 'Carga completa pero con inconsistencias encontradas'
 					embed.color = discord.Color.red()
 					# Script para corregir inconsistencia
-					if ScriptSQL.crear(i, patrimonio, fecha_corte, validaciones[i][0]):
-						archivo_sql += 1
-					#Parametro para controlar los archivos que se adjuntaran al correo
-					archivos_adjuntos.append(i)
+					if i != 8:
+						if ScriptSQL.crear(i, patrimonio, fecha_corte, erroresEncontrados[i]):
+							archivo_sql += 1
+							archivoSqlAdjunto.append(i)
+						#Parametro para controlar los archivos que se adjuntaran al correo
 			# Bloque para enviar correo
-			total_inconsistencia = sum(i[0] for i in validaciones)
-			if total_inconsistencia > 0:
-				# Consultas SQL y texto para seguimiento
-				consulta_rem, mensaje_rem = ReportsRev.consulta_remesas()
-				remesa_reports = []
-				# Se valida que las remesas esten generadas en el Reports
-				await ctx.channel.send('Consultas adicionales en Reports...')
-				with conexion_db.cursor() as consulta_db:
-					for i in range(0, len(consulta_rem)):
-						await ctx.channel.send('..->Consultando Remesas en Reports: ' + mensaje_rem[i] + '...')
-						consulta_db.execute(consulta_rem[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
-						remesa_reports.append(consulta_db.fetchone())
-				await ctx.channel.send('_')
-				sum_reports_rem = sum(i[0] for i in remesa_reports)
-				# Bloque para evaluar si estan generadas las remesas en el Reports
-				if  sum_reports_rem == 0:
-					remesa_generada = 2
-				#Archivo con registros que presentan inconsistencia
-				consulta_xls, mensaje_xls = RespaldoRev.detalle_valdiario()
-				data_xls = crear_xls(patrimonio, fecha_corte, archivos_adjuntos, consulta_xls, mensaje_xls)
+			if len(archivoSqlAdjunto) > 0:
+				consultaErrorData, mensajeErrorData = RespaldoRev.detalle_valdiario(entorno, dblink)
+				data_xls = crear_xls(patrimonio, fecha_corte, archivoSqlAdjunto, consultaErrorData, mensajeErrorData)
 				if data_xls:
 					archivo_xls += 1
 				# Se envia correo con las indicaciones
-				repuesta = Correo.enviar(archivos_adjuntos, patrimonio, fecha_corte, remesa_generada)
+				repuesta = Correo.enviar(archivoSqlAdjunto, patrimonio, fecha_corte)
 				respuesta_embed = 'Se envio un correo a la direccion %s con %s archivo .XLSX y %s scripts .SQL con las indicaciones para realizar las correcciones.' % (repuesta, str(archivo_xls), str(archivo_sql))
 				embed.add_field(name='NOTA', value=respuesta_embed, inline=False)
-			elif suma_remesa == 0:
-				sum_reports_rem = 0
-				embed.color = discord.Color.dark_gold()
-				embed.title = 'Carga de la información INCOMPLETA'
-				# Mensajes para mostrar en panatalla
-				error, recomendado, nota_msj = Mensaje.remesas_respaldo( patrimonio, fecha_corte)
-				# Consultas SQL y texto para seguimiento
-				consulta_rem, mensaje_rem = ReportsRev.consulta_remesas()
-				remesa_reports = []
-				# Se valida que las remesas esten generadas en el Reports
-				await ctx.channel.send('Consultas adicionales en Reports...')
-				with conexion_db.cursor() as consulta_db:
-					for i in range(0, len(consulta_rem)):
-						await ctx.channel.send('..->Consultando Remesas en Reports: ' + mensaje_rem[i] + '...')
-						consulta_db.execute(consulta_rem[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
-						remesa_reports.append(consulta_db.fetchone())
-				sum_reports_rem = sum(i[0] for i in remesa_reports)
-				# Si las remesas no estan en el reports se cambia el mensaje
-				if sum_reports_rem == 0:
-					# Mensajes para mostrar en panatalla
-					error, recomendado, nota_msj = Mensaje.remesas_reports(str(data[0][0]), patrimonio, fecha_corte)
-				embed.add_field(name='ERROR ENCONTRADO', value=error, inline=False)
-				embed.add_field(name='RECOMENDACIONES', value=recomendado, inline=False)
-				embed.add_field(name='NOTA', value=nota_msj, inline=False)
 		else:
+			dblink_reports = ENTORNO_REPORTS['DBLINK']
 			await ctx.channel.send('-')
-			embed = discord.Embed(
-					title='Carga de la información para realizar revisón INCOMPLETA',
-					description=descripcion, 
-					timestamp=datetime.datetime.utcnow(),
-					color=discord.Color.red()
-					)
+			embed.title = 'Carga de la información para realizar revisón INCOMPLETA'
+			embed.color = discord.Color.red()
 			# Consultas SQL y texto para seguimiento
-			consulta_reports, mensaje_reports = ReportsRev.consulta_neg_remesas()
+			consulta_reports, mensaje_reports = RespaldoRev.consulta_neg_remesas('reports', dblink)
 			data_reports = []
 			# Se valida que la informacion este cargada en el Reports
 			await ctx.channel.send('Consultas adicionales...')
-			with conexion_db.cursor() as consulta_db:
+			with conexionDB.cursor() as consulta_db:
 				for i in range(0, len(consulta_reports)):
 					await ctx.channel.send('..->Consultando en Reports: ' + mensaje_reports[i] + '...')
 					consulta_db.execute(consulta_reports[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
@@ -203,6 +166,9 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			else:
 				# Mensajes para mostrar en panatalla
 				error, recomendado, nota_msj = Mensaje.reports_odi(patrimonio, fecha_corte)
+			if totalRegistrosRespaldo >= 1:
+				nota_msj = "Si ya realizo la ejecucion del proceso ODI, espere a que este finalice y luego vuelva a ejecutar la revisión"
+				embed.color = discord.Color.dark_gold()
 			embed.add_field(name='ERROR ENCONTRADO', value=error, inline=False)
 			embed.add_field(name='RECOMENDACIONES', value=recomendado, inline=False)
 			embed.add_field(name='NOTA', value=nota_msj, inline=False)
@@ -216,17 +182,8 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 		await ctx.send(embed=embed)
 
 @bot.command()
-async def test(ctx, patrimonio: int, fecha_corte: str):
-	consultas, mensaje= RespaldoRev.consulta_diario()
-	row = []
-	await ctx.channel.send('Espere mientras se realiza la consulta...')
-	cnx = conexion()
-	with cnx.cursor() as cursor:
-		for i in range(0, len(consultas)):
-			cursor.execute(consultas[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
-			row.append(cursor.fetchone())
-			await ctx.channel.send('Consultando ' + mensaje[i] + '...')
-	print(sum(i[0] for i in row))
+async def test(ctx):
+	await ctx.send('Hola estoy aqui!!')
 
 @bot.command()
 async def vpn_active(ctx):
@@ -241,16 +198,17 @@ async def vpn_active(ctx):
 @bot.command()
 async def vpnActiveLinux(ctx):
 	try:
-		cp = subprocess.run(['bash','/usr/bin/vpn_up.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-		await ctx.send('Conectando VPN: %s - %s' % (cp.stdout, cp.stderr))
+		cp = subprocess.run('sudo bash /usr/bin/start_vpn.sh', shell=True)
+		await ctx.channel('Conectando VPN: %s' % cp.returncode)
+		await ctx.send('Conexion con DB: %s OK' % str(conexionDB))
 	except Exception as e:
 		await ctx.send('Error VPN: %s' % e)
 
 @bot.command()
 async def vpnDeactiveLinux(ctx):
 	try:
-		cp = subprocess.run(['bash','/usr/bin/vpn_down.sh'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-		await ctx.send('Desconectando VPN: %s - %s' % (cp.stdout, cp.stderr))
+		cp = subprocess.run('sudo bash /usr/bin/stop_vpn.sh', shell=True)
+		await ctx.send('Desconectando VPN: %s' % cp.returncode)
 	except Exception as e:
 		await ctx.send('Error VPN: %s' % e)
 

@@ -2,41 +2,70 @@ from consultas import Respaldo
 
 class RespaldoRev(object):
 
-	def consulta_diario():
-		consultas = (Respaldo.consultar_negocios(), 
-			Respaldo.consultar_negocios_cuotas(), 
-			Respaldo.consultar_movimientos_int_extra(),
-			Respaldo.consultar_movimientos_financieros(),
-			Respaldo.consultar_remesas(),
-			Respaldo.consultar_remesas_detalle()
-			# Respaldo.consultar_negocios_nulos(),
-			# Respaldo.consultar_negocios_nulos()
+	def consulta_diario(entorno, dblink):
+		consultas = (
+			Respaldo.consultarNegocios(entorno, dblink), 
+			Respaldo.consultarCuotasNegocios(entorno, dblink), 
+			Respaldo.consultarMovExtra(entorno, dblink),
+			Respaldo.consultarMovFinancieros(entorno, dblink),
+			Respaldo.consultarRemesa(entorno, dblink),
+			Respaldo.consultarDetalleRemesa(entorno, dblink)
+			# Respaldo.consultar_negocios_nulos(entorno, dblink),
+			# Respaldo.consultar_negocios_nulos(entorno, dblink)
 			)
 		estado = ('Negocios', 'Cuotas', 'Movimientos con Intereses', 'Movimientos Financieros', 'Remesas', 'Detalles de Remesas')
 		return (consultas, estado)
 
-	def validaciones_diario():
+	def validaciones_diario(entorno, dblink):
 		consultas = (
-			Respaldo.consultar_negocios_nulos(),
-			Respaldo.consultar_negocios_duplicados(),
-			Respaldo.consultar_cuotas_duplicadas(),
-			Respaldo.consultar_cuotas_snegocios(),
-			Respaldo.consultar_negociosNull()
+			Respaldo.validarNegociosDocNull(entorno, dblink),
+			Respaldo.validarNogociosDuplicados(entorno, dblink),
+			Respaldo.validarCuotasDuplicadas(entorno, dblink),
+			Respaldo.validarCuotasSinNegocio(entorno, dblink),
+			Respaldo.validarNroNegociosNull(entorno, dblink),
+			# Respaldo.validarMovSinCuotaExtra(entorno, dblink),
+			Respaldo.count_remesas(entorno, dblink),
+			Respaldo.validarMovSinCuota(entorno, dblink),
+			Respaldo.validarClienteDuplicadoTc(),
+			# Respaldo.validarCuentasMigradasDuplicadas()
+			Respaldo.count_remesas(entorno, dblink)
 		)
-		estado = ('Negocios con tipo de documento NULL', 'Negocios duplicados', 'Cuotas duplicadas', 'Cuotas sin Negocio', 'Numero de Negocio NULL')
+		estado = ('Negocios con tipo de documento NULL', 'Negocios duplicados', 'Cuotas duplicadas', 'Cuotas sin Negocio', 'Numero de Negocio NULL', 'Movimientos sin cuotas Extrafin', 'Movimientos sin cuotas', 'Clientes duplicados en TC', 'Cuentas Migradas Duplicadas')
 		return (consultas, estado)
 
-	def detalle_valdiario():
+	def detalle_valdiario(entorno, dblink):
 		consultas = (
-			Respaldo.detalle_negocios_null(),
-			Respaldo.detalle_negocios_duplicados(),
-			Respaldo.detalle_cuotas_cuplicadas(),
-			Respaldo.detalle_cuotas_snegocio(),
-			Respaldo.detalle_negociosNull()
-			# Respaldo.consultar_remesas_cantidad(),
-			# Respaldo.consultar_remesas_cantidad(),
-			# Respaldo.consultar_remesas_cantidad(),
-			# Respaldo.consultar_remesas_cantidad()
+			Respaldo.remesas_cantidad(entorno, dblink),
+			Respaldo.detalle_negocios_duplicados(entorno, dblink),
+			Respaldo.detalle_cuotas_cuplicadas(entorno, dblink),
+			Respaldo.detalle_cuotas_snegocio(entorno, dblink),
+			Respaldo.detalle_negociosNull(entorno, dblink),
+			Respaldo.detalle_mov_sincuotasV006(entorno, dblink),
+			Respaldo.detalle_mov_sincuotasV016(entorno, dblink),
+			[
+				Respaldo.detalle_clienteDuplicado_tc(),
+				Respaldo.detalle_clienteFipCuentas(),
+				Respaldo.detalle_clienteDiarioNegocios(entorno, dblink),
+				Respaldo.detalle_clienteFipExtraIc(),
+				Respaldo.detalle_clienteFipNegocios(),
+				Respaldo.detalle_clienteFipCuentaCredito()
+				# Respaldo.remesas_cantidad(entorno, dblink),
+				# Respaldo.remesas_cantidad(entorno, dblink)
+			]
 		)
-		estado = ('NEG_NULL', 'NEG_DUPLICADOS', 'CUO_DUPLICADAS', 'CUO_SNEGOCIO', 'NRO_NEGNULL')
+		estado = ('NEG_NULL', 'NEG_DUPLICADOS', 'CUO_DUPLICADAS', 'CUO_SNEGOCIO', 'NRO_NEGNULL', 'MOVEXTRA_SCUOTA', 'MOV_SCUOTA', 'CLIENTE_DUP_TC')
 		return (consultas, estado)
+
+	def consulta_neg_remesas(entorno, dblink):
+		consultas = (
+			Respaldo.consultarNegocios(entorno, dblink),
+			# Respaldo.consultar_negocios_nulos(),
+			# Respaldo.consultar_negocios_nulos()
+			Respaldo.consultarRemesa(entorno, dblink)
+			)
+		estado = ('Negocios', 'Remesas')
+		return (consultas, estado)
+
+# x, k = RespaldoRev.detalle_valdiario('fip', '')
+# for y in x[7]:
+# 	print(y)
