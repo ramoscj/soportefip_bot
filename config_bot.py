@@ -8,7 +8,7 @@ ENTORNO_REPORTS = {'DB': 'REPORTS', 'DBLINK': '@kamet.din.cl'}
 
 CORREOS = {'TO': 'richard.ruiz@adretail.cl', 
         'TO2': 'sop01@imagicair.cl', 
-        'CC': ['operaciones@abcdin.cl', 'axel.riobo@imagicair.cl', 'eduardo@imagicair.cl'], 
+        'CC': ['operaciones@abcdin.cl', 'axel.riobo@imagicair.cl', 'eduardo@imagicair.cl', 'carlos.ramos@imagicair.cl'], 
         'CC2': ['carlos.ramos@imagicair.cl',]
     }
 
