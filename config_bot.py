@@ -8,7 +8,7 @@ ENTORNO_REPORTS = {'DB': 'REPORTS', 'DBLINK': '@kamet.din.cl'}
 
 CORREOS = {'TO': 'richard.ruiz@adretail.cl', 
         'TO2': 'sop01@imagicair.cl', 
-        'CC': ['operaciones@abcdin.cl', 'axel.riobo@imagicair.cl', 'eduardo@imagicair.cl', 'carlos.ramos@imagicair.cl'], 
+        'CC': ['operaciones@abcdin.cl', 'axel.riobo@imagicair.cl', 'eduardo@imagicair.cl', 'sop01@imagicair.cl'], 
         'CC2': ['carlos.ramos@imagicair.cl',]
     }
 
@@ -18,4 +18,4 @@ if sistema.startswith('Windows-10'):
 else:
     SO = '/home/ubuntu/bot/soportefip_bot'
 PAT_BOT = {'PATH': SO}
-print(PAT_BOT['PATH'])
+# print(PAT_BOT['PATH'])

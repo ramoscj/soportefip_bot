@@ -38,28 +38,28 @@ async def on_command_error(ctx, error):
 	if isinstance(error, commands.MissingRequiredArgument):
 		if mensaje.find("patrimonio") >= 0:
 			await ctx.channel.send('Error: Falta el argumento "PATRIMONIO" y "FECHA DE CORTE" en el comando!')
-			embed.add_field(name='Ejemplo', value='"$comando_a_ejecutar 6 20052020"', inline=False)
+			embed.add_field(name='Ejemplo', value='">comando_a_ejecutar 6 20052020"', inline=False)
 			await ctx.send(embed=embed)
 		elif mensaje.find("fecha_corte") >= 0:
 			await ctx.channel.send('Error: Falta el argumento "FECHA DE CORTE" en el comando!')
-			embed.add_field(name='Ejemplo', value='"$comando_a_ejecutar 6 20052020"', inline=False)
+			embed.add_field(name='Ejemplo', value='">comando_a_ejecutar 6 20052020"', inline=False)
 			await ctx.send(embed=embed)
 	if isinstance(error, commands.BadArgument):
 		if mensaje.find("patrimonio") >= 0:
 			await ctx.channel.send('Error: Parametro "PATRIMONIO" incorrecto!')
-			embed.add_field(name='Ejemplo', value='"$comando_a_ejecutar 6 20052020"', inline=False)
+			embed.add_field(name='Ejemplo', value='">comando_a_ejecutar 6 20052020"', inline=False)
 			await ctx.send(embed=embed)
 		elif mensaje.find("fecha_corte") >= 0:
-			await ctx.channel.send('Error: Parametro "FECHA DE CORTEeee" incorrecto!')
-			embed.add_field(name='Ejemplo', value='"$comando_a_ejecutar 6 20052020"', inline=False)
+			await ctx.channel.send('Error: Parametro "FECHA DE CORTE" incorrecto!')
+			embed.add_field(name='Ejemplo', value='">comando_a_ejecutar 6 20052020"', inline=False)
 			await ctx.send(embed=embed)
 	else: 
 		if mensaje.find("ORA-01840") >= 0 or mensaje.find("ORA-01858") >= 0:
 			await ctx.channel.send('Error: Parametro "FECHA DE CORTE" incorrecto!')
-			embed.add_field(name='Ejemplo', value='"$comando_a_ejecutar 6 20052020"', inline=False)
+			embed.add_field(name='Ejemplo', value='">comando_a_ejecutar 6 20052020"', inline=False)
 			await ctx.send(embed=embed)
 		else:
-			print('Error no manejado: ' + str(error))
+			await ctx.send('Error no manejado: ' + str(error))
 
 @bot.command()
 async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
