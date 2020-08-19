@@ -9,7 +9,7 @@ from consultas import Respaldo
 
 from acceso_db import conexion
 
-from config_bot import PATRIMONIOS_TC
+from config_bot import PATRIMONIOS_TC, PAT_BOT
 
 def crear_csv(nombre_archivo, registros:[]):
     archivo = 'csv_data/%s.csv' % (str(nombre_archivo))
@@ -27,7 +27,7 @@ def crear_csv(nombre_archivo, registros:[]):
 def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
     
     nombre_archivo = 'INCONSISTENCIAS_PAT-%s_FCORT-%s' % (patrimonio, fecha_corte)
-    workbook = xlsxwriter.Workbook('csv_data/%s.xlsx' % nombre_archivo)
+    workbook = xlsxwriter.Workbook('%s/csv_data/%s.xlsx' % (PAT_BOT['PATH'], nombre_archivo))
     conexion_db = conexion()
     titulos = (
         'NEGOCIOS CON TIPO DE DOCUMENTO NULL',

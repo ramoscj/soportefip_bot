@@ -8,6 +8,8 @@ import platform
 
 import smtplib, os
 import datetime
+
+from config_bot import PAT_BOT, CORREOS
  
 class Correo(object):
 
@@ -32,12 +34,8 @@ class Correo(object):
 		asunto = 'Revision de DATA para el proceso FIP_EJEC_DIARIO PATRIMONIO: %s FECHA DE CORTE: %s' % (patrimonio, fecha_corte)
 		password = "satelite01"
 		sistema = platform.platform()
-		if sistema.startswith('Windows-10'):
-			cc = ['carlos.ramos@imagicair.cl']
-			msg['To'] = 'sop01@imagicair.cl'
-		else:
-			cc = ['axel.riobo@imagicair.cl', 'carlos.pizarro@imagicair.cl', 'eduardo@imagicair.cl']
-			msg['To'] = 'richard.ruiz@adretail.cl'
+		cc = CORREOS['CC2']
+		msg['To'] = CORREOS['TO2']
 		msg['From'] = 'sop01@imagicair.cl'
 		msg['Cc'] = ', '.join(cc)
 		msg['Subject'] = asunto
@@ -80,7 +78,7 @@ class Correo(object):
 				'movimiento_scuota_PAT-%s_FCORTE-%s' % (patrimonio, fecha_corte)
 				)
 			nombre_archivo = 'INCONSISTENCIAS_PAT-%s_FCORT-%s' % (patrimonio, fecha_corte)
-			archivo_path = 'csv_data/%s.xlsx' % (nombre_archivo)
+			archivo_path = '%s/csv_data/%s.xlsx' % (PAT_BOT['PATH'], nombre_archivo)
 			if (os.path.isfile(archivo_path)):
 				fp = open(archivo_path,'rb')
 				att = MIMEApplication(fp.read(),_subtype="xlsx")
@@ -90,7 +88,7 @@ class Correo(object):
 				msg.attach(att)
 			i = 1
 			for nombre_archivo in lista_archivos:
-				archivo_path = 'scripts/%s.sql' % (nombre_archivo)
+				archivo_path = '%s/scripts/%s.sql' % (PAT_BOT['PATH'], nombre_archivo)
 				part = MIMEBase('application', "octet-stream")
 				part.set_payload(open(archivo_path, "rb").read())
 				nombre_archivo = '%s_DELETE_%s.sql' % (str(i),lista_nombres[nombre_archivo])

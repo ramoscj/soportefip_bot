@@ -1,10 +1,10 @@
-from config_bot import PATRIMONIOS_TC
+from config_bot import PATRIMONIOS_TC, PAT_BOT
 
 class ScriptSQL(object):
 
     def crear(archivo:int, patrimonio: int, fecha_corte: str, cantidad: int):
         try:
-            archivo_path = "scripts/%s.sql" % (str(archivo))
+            archivo_path = "%s/scripts/%s.sql" % (PAT_BOT['PATH'], str(archivo))
             lista_sql = (
                 ScriptSQL.scriptNegociosNull(cantidad),
                 ScriptSQL.scriptNegociosDuplicados(cantidad, patrimonio, fecha_corte),

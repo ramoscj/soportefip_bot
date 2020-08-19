@@ -13,7 +13,7 @@ from embed_mensajes import Mensaje
 from acceso_db import conexion
 from bot_token import TOKEN
 
-from consultas import Reports, Respaldo
+from consultas import Respaldo
 from respaldo_revisiones import RespaldoRev
 from reports_revisiones import ReportsRev
 
@@ -202,6 +202,7 @@ async def vpnActiveLinux(ctx):
 		await ctx.channel.send('Conectando VPN: %s' % cp.returncode)
 		conexionDB = conexion()
 		await ctx.send('Conexion con DB: %s OK' % str(conexionDB))
+		conexionDB.close
 	except Exception as e:
 		await ctx.send('Error VPN: %s' % e)
 
