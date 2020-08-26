@@ -34,10 +34,11 @@ class Correo(object):
 		asunto = 'Revision de DATA para el proceso FIP_EJEC_DIARIO PATRIMONIO: %s FECHA DE CORTE: %s' % (patrimonio, fecha_corte)
 		password = "satelite01"
 		sistema = platform.platform()
-		cc = CORREOS['CC2']
-		msg['To'] = CORREOS['TO2']
+		agregados = ', '.join(CORREOS['CC'])
+		destinatario = CORREOS['TO']
+		msg['To'] = destinatario
 		msg['From'] = 'sop01@imagicair.cl'
-		msg['Cc'] = ', '.join(cc)
+		msg['Cc'] = agregados
 		msg['Subject'] = asunto
 		envio = datetime.datetime.now()
 		mensaje = '<h2 style="color: #2b2301;">Instrucciones para realizar correcciones de inconsistencias encontradas:</h2>'
@@ -45,18 +46,9 @@ class Correo(object):
 		mensaje += '<ol style="line-height: 32px; list-style-type: square;">'
 		for errores_encontrados in lista_archivos:
 			mensaje += '<li style="clear: both;">%s</li>' % lista_mensajes[0][errores_encontrados]
-		# if remesa_generada == 2:
-		# 	mensaje += '<li style="clear: both;">%s</li>' % lista_mensajes[1][0]
-		# elif remesa_generada == 1:
-		# 	mensaje += '<li style="clear: both;">%s</li>' % lista_mensajes[1][1]
 		mensaje += '</ol></p>'
 		mensaje += '<h3 style="color: #2b2301;">Para corregir las inconsistencia se recomienda:</h3>'
 		mensaje += '<ol style="line-height: 32px;">'
-		# if remesa_generada == 2:
-		# 	mensaje += '<li style="clear: both;">Generar remesas con el FIP_WRAP opcion 3 (para el patrimonio y fecha de corte)</li>'
-		# 	mensaje += '<li style="clear: both;">Ejecutar el ODI para el patrimonio y fecha de corte. Esperar a que finalice</li>'
-		# elif remesa_generada == 1:
-		# 	mensaje += '<li style="clear: both;">Ejecutar el ODI para el patrimonio y fecha de corte. Esperar a que finalice</li>'
 		mensaje += '<li style="clear: both;">Ejecutar los scripts .SQL enviados en orden.</li>'
 		mensaje += '<li style="clear: both;">Ralizar nuevamente la revisión para confirmar que no existan errores.</li>'
 		mensaje += '<li style="clear: both;">Iniciar con el proceso diario.</li></ol>'
@@ -97,8 +89,8 @@ class Correo(object):
 				i += 1
 
 			# Se envia el correo
-			correos = [msg['To'], msg['Cc']]
-			server = smtplib.SMTP('mail.imagicair.cl: 587')
+			correos = agregados.split(',') + [destinatario]
+			server = smtplib.SMTP('mail.imagicair.cl:587')
 			server.starttls()
 			server.login(msg['From'], password)
 			server.sendmail(msg['From'], correos, msg.as_string())
@@ -106,5 +98,3 @@ class Correo(object):
 			return ("%s" % (msg['To']))
 		except Exception as e:
 			raise Exception("El correo no pudo enviarse, error: %s" % (e))
-
-#Correo.enviar('carlos.ramos@imagicair.cl', 'sop01@imagicair.cl', 'Asunto-Prueba', 'Este es el mensaje')

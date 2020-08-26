@@ -1,12 +1,32 @@
-import subprocess
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+from email.mime.base import MIMEBase
+#from email import Encoders
+import mimetypes
+import platform
 
-# completed = subprocess.call('echo $PATH', shell=True)
-# print('returncode:', completed)
+import smtplib, os
+import datetime
 
-# , '-s', '<', 'C:\Users\Administrator\Documents\my_key.dat'
-programa = 'vpncli.exe'
-parametros = 'my_key.dat'
-cp = subprocess.run(['C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\%s' % programa, '-s', '<', '..\..\%s' % parametros], shell=True)
-# print('"C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\%s"' % programa)
-if cp.returncode:
-    print(cp.returncode)
+from config_bot import PAT_BOT, CORREOS
+
+try:
+    msg = MIMEMultipart()
+    asunto = 'Revision de DATA para el proceso FIP_EJEC_DIARIO PATRIMONIO'
+    password = "satelite01"
+    agregados = ', '.join(CORREOS['CC'])
+    print(agregados)
+    destinatario = CORREOS['TO']
+    msg['To'] = destinatario
+    msg['From'] = 'sop01@imagicair.cl'
+    msg['Cc'] = agregados
+
+    correos = agregados.split(',') + [destinatario]
+    server = smtplib.SMTP('mail.imagicair.cl:587')
+    server.starttls()
+    server.login(msg['From'], password)
+    server.sendmail(msg['From'], correos, msg.as_string())
+    server.quit()
+except Exception as e:
+    print(e)
