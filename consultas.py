@@ -61,7 +61,7 @@ class Reports(object):
 	def consultar_remesas_cantidad():
 		consulta = "select nro_remesa, patrimonio, tipo_movimiento, num_cta_credito, cod_cliente, org_code from reports.fip_diariodet_remesa@kamet.din.cl where patrimonio = :pat_consulta and fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999 and ROWNUM <= 20"
 		return consulta
-		
+
 class Respaldo(object):
 
 	def consultarNegocios(entorno, dblink):
@@ -106,7 +106,7 @@ class Respaldo(object):
 		consulta = "select count(1) from %s.fip_diario_negocios%s frc where (frc.num_cta_credito, frc.cod_cliente, frc.cod_extrafin, frc.fecha_corte, frc.rowid) in ( select fn.num_cta_credito, fn.cod_cliente, fn.cod_extrafin, fn.fecha_corte, min(fn.rowid) from %s.fip_diario_negocios%s fn where fn.fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999 and fn.codigo_patrimonio = :pat_consulta having count(1) > 1 group by fn.num_cta_credito, fn.cod_cliente, fn.cod_extrafin, fn.fecha_corte ) and frc.codigo_patrimonio = :pat_consulta and frc.fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999" % (entorno, dblink, entorno, dblink)
 		return consulta
 
-	def validarCuotasSinNegocio(entorno, dblink):		
+	def validarCuotasSinNegocio(entorno, dblink):
 		consulta = "select count(1) from %s.fip_diario_cuotanegocios%s fdc where fdc.fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') and fdc.codigo_patrimonio = :pat_consulta and not exists (select 1 from %s.fip_diario_negocios%s fdn where fdn.num_cta_credito = fdc.num_cta_credito and fdn.cod_cliente = fdc.cod_cliente and fdn.cod_extrafin = fdc.cod_extrafin and fdn.cod_empresa = fdc.cod_empresa and fdn.fecha_corte = fdc.fecha_corte and fdn.codigo_patrimonio = fdc.codigo_patrimonio)" % (entorno, dblink, entorno, dblink)
 		return consulta
 
@@ -121,7 +121,7 @@ class Respaldo(object):
 	def validarClienteDuplicadoTc():
 		consulta = "select count(1) from fip.fip_cartera_clasificada fcc where fcc.codigo_cliente in (select b.cod_cliente from tc_cambioprod_enc a, tc_cuenta_credito b where a.fec_estado between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999 and a.ind_estado = 'F' and b.num_cta_credito = a.num_cta_credito and b.cod_empresa = a.cod_empresa and exists (select 1 from fip.fip_patrimonios fp, fip.fip_cartera_clasificada fn where fp.empresa = a.cod_empresa and fp.estado_patrimonio = 'A' and fn.codigo_patrimonio = fp.codigo_patrimonio and fn.codigo_cliente = b.cod_cliente and fp.codigo_patrimonio_ic = :pat_consulta) group by a.num_cta_ic, b.cod_cliente, b.cod_empresa, b.fec_inclusion) and fcc.codigo_patrimonio not in ('1', :pat_consultatc, :pat_consulta) and length(fcc.codigo_patrimonio) = 1"
 		return consulta
-	
+
 	# def consultar_clienteDuplicado_tc():
 	# 	consulta = "select count(1) from fip.fip_cartera_clasificada fcc where fcc.codigo_cliente in (select b.cod_cliente from tc_cambioprod_enc a, tc_cuenta_credito b where a.fec_estado between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999 and a.ind_estado = 'F' and b.num_cta_credito = a.num_cta_credito and b.cod_empresa = a.cod_empresa and exists (select 1 from fip.fip_patrimonios fp, fip.fip_cartera_clasificada fn where fp.empresa = a.cod_empresa and fp.estado_patrimonio = 'A' and fn.codigo_patrimonio = fp.codigo_patrimonio and fn.codigo_cliente = b.cod_cliente and fp.codigo_patrimonio_ic = :pat_consulta) group by a.num_cta_ic, b.cod_cliente, b.cod_empresa, b.fec_inclusion) and fcc.codigo_patrimonio not in ('1', :pat_consultatc, :pat_consulta) and length(fcc.codigo_patrimonio) = 1"
 	# 	return consulta
@@ -147,7 +147,7 @@ class Respaldo(object):
 	def detalle_cuotas_snegocio(entorno, dblink):
 		consulta = "select  fdc.codigo_patrimonio, fdc.num_cta_credito, fdc.cod_cliente, fdc.cod_extrafin, fdc.fecha_corte, nvl(fdc.num_cuota, 0) from %s.fip_diario_cuotanegocios%s fdc where fdc.fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') and fdc.codigo_patrimonio = :pat_consulta and not exists (select 1 from %s.fip_diario_negocios%s fdn where fdn.num_cta_credito = fdc.num_cta_credito and fdn.cod_cliente = fdc.cod_cliente and fdn.cod_extrafin = fdc.cod_extrafin and fdn.cod_empresa = fdc.cod_empresa and fdn.fecha_corte = fdc.fecha_corte and fdn.codigo_patrimonio = fdc.codigo_patrimonio)" % (entorno, dblink, entorno, dblink)
 		return consulta
-	
+
 	def detalle_negociosNull(entorno, dblink):
 		consulta = "select codigo_patrimonio, num_cta_credito, cod_cliente, cod_extrafin, fecha_corte, nvl(tipo_documento, 'NULL') as tipo_documento from %s.fip_diario_negocios%s where codigo_patrimonio = :pat_consulta and fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999 and cod_extrafin is null" % (entorno, dblink)
 		return consulta
@@ -187,12 +187,21 @@ class Respaldo(object):
 		return consulta
 
 	# CONSULTAS PARA PRUEBAS
+
 	def remesas_cantidad(entorno, dblink):
 		consulta = "select nro_remesa, patrimonio, tipo_movimiento, num_cta_credito, cod_cliente, org_code from %s.fip_diariodet_remesa%s where patrimonio = :pat_consulta and fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999 and ROWNUM <= 20" % (entorno, dblink)
 		return consulta
 
 	def count_remesas(entorno, dblink):
 		consulta = "select count(1) from %s.fip_diariodet_remesa%s where patrimonio = :pat_consulta and fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') +.99999" % (entorno, dblink)
+		return consulta
+
+	def diferencias_remesas():
+		consulta = "SELECT nvl(remesa.rem_patrimonio, 0) remesa_patrimonio ,nvl(remesa.rem_nro_remesa, 0) numero_remesa ,remesa.red_fecha_corte remesa_fecha_corte ,nvl(remesa.red_tipo_movimiento, 0) remesa_tipo_movimiento ,nvl(remesa.red_cta_credito_remesa, 0) remesa_cuenta ,remesa.monto_rem remesa_monto ,nvl(movimientos.monto_mov, 0) movimiento_monto ,nvl(movimientos.numero_cuenta, 0) movimiento_cuenta ,nvl(movimientos.tipo_movimiento, 0) movimiento_tipo_movimiento ,nvl(movimientos.fecha_movimiento, remesa.red_fecha_corte) movimiento_fecha_movimiento ,nvl(remesa.monto_rem, 0) + nvl(movimientos.monto_mov, 0) diferencia FROM (SELECT re.rem_patrimonio ,re.red_cta_credito_remesa ,re.rem_nro_remesa ,re.red_fecha_corte ,re.red_tipo_movimiento ,SUM(re.red_monto_movimiento) monto_rem FROM fip.fip_detalle_remesa_ic re WHERE re.rem_patrimonio = :pat_consulta AND re.red_fecha_corte BETWEEN to_date(:fecha_inicio, 'ddmmyyyy') AND to_date(:fecha_fin, 'ddmmyyyy') +.99999 AND re.red_tipo_movimiento IN (4, 6, 16) GROUP BY re.rem_patrimonio ,re.red_cta_credito_remesa ,re.rem_nro_remesa ,re.red_fecha_corte ,re.red_tipo_movimiento) remesa FULL OUTER JOIN (SELECT mov.codigo_patrimonio ,mov.numero_cuenta ,mov.numero_remesa ,mov.fecha_movimiento ,mov.tipo_movimiento ,SUM(mov.monto) monto_mov FROM fip.fip_movimientos_diarios mov WHERE mov.codigo_patrimonio = :pat_consulta AND mov.fecha_movimiento BETWEEN to_date(:fecha_inicio, 'ddmmyyyy') AND to_date(:fecha_fin, 'ddmmyyyy') +.99999 AND mov.tipo_movimiento IN (4, 6, 16) AND mov.numero_remesa IS NOT NULL GROUP BY mov.codigo_patrimonio ,mov.numero_cuenta ,mov.numero_remesa ,mov.fecha_movimiento ,mov.tipo_movimiento) movimientos ON (remesa.rem_patrimonio = movimientos.codigo_patrimonio AND remesa.rem_nro_remesa = movimientos.numero_remesa AND remesa.red_fecha_corte = movimientos.fecha_movimiento AND remesa.red_tipo_movimiento = movimientos.tipo_movimiento AND remesa.red_cta_credito_remesa = movimientos.numero_cuenta) HAVING nvl(remesa.monto_rem, 0) + nvl(movimientos.monto_mov, 0) <> 0 group by remesa.rem_patrimonio, remesa.rem_nro_remesa, remesa.red_fecha_corte, remesa.red_tipo_movimiento, remesa.red_cta_credito_remesa, movimientos.numero_cuenta, remesa.monto_rem, movimientos.monto_mov, movimientos.tipo_movimiento, movimientos.fecha_movimiento order by movimientos.fecha_movimiento, movimientos.tipo_movimiento"
+		return consulta
+
+	def asientos_contables_duplicados():
+		consulta = "select count(1) cantidad, fmdo.FECHA_MOVIMIENTO from fip.fip_movimientos_diarios fmdo where (fmdo.codigo_cliente, fmdo.numero_cuenta, nvl(fmdo.numero_negocio, 1), fmdo.numero_movimiento, fmdo.rowid) in (select fp2.codigo_cliente, fp2.numero_cuenta, nvl(fp2.numero_negocio, 1), fp2.numero_movimiento, min(rowid) idt from fip.fip_movimientos_diarios fp2 where fp2.CODIGO_PATRIMONIO = :pat_consulta and fp2.FECHA_MOVIMIENTO BETWEEN to_date(:fecha_inicio, 'ddmmyyyy') AND to_date(:fecha_fin, 'ddmmyyyy') +.99999 having count(1) > 1 group by fp2.codigo_cliente, fp2.numero_cuenta, fp2.numero_negocio, fp2.numero_movimiento ) group by fmdo.FECHA_MOVIMIENTO"
 		return consulta
 
 # print(Respaldo.consultarNegocios('reports', '@kamet.din.cl'))

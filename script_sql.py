@@ -34,7 +34,7 @@ class ScriptSQL(object):
                     "COMMIT;\n"
             ]
         return texto_sql
-    
+
     def scriptNegociosDuplicados(cantidad, pat, fecha_corte):
         texto_sql = [
                     "-- "+ str(cantidad) + " NEGOCIOS DUPLICADOS\n"
@@ -55,7 +55,7 @@ class ScriptSQL(object):
                     "COMMIT;\n"
             ]
         return texto_sql
-    
+
     def scriptCuotasDuplicadas(cantidad, pat, fecha_corte):
         texto_sql = [
                     "-- "+ str(cantidad) + " CUOTAS DUPLICADAS\n"
@@ -95,7 +95,7 @@ class ScriptSQL(object):
                     "COMMIT;\n"
             ]
         return texto_sql
-    
+
     def scriptCodigoNegNull(cantidad, pat, fecha_corte):
         texto_sql = [
                     "-- "+ str(cantidad) + " NUMERO DE NEGOCIO NULL\n"
@@ -200,7 +200,7 @@ class ScriptSQL(object):
                     "COMMIT;\n"
             ]
         return texto_sql
-    
+
     def scriptClienteDuplicadoTc (cantidad, pat, fecha_corte):
         patrimonioTC = PATRIMONIOS_TC.get(int(pat))
         texto_sql = [

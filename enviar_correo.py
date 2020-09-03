@@ -10,7 +10,7 @@ import smtplib, os
 import datetime
 
 from config_bot import PAT_BOT, CORREOS
- 
+
 class Correo(object):
 
 	def enviar(lista_archivos:[], patrimonio, fecha_corte):
@@ -34,8 +34,14 @@ class Correo(object):
 		asunto = 'Revision de DATA para el proceso FIP_EJEC_DIARIO PATRIMONIO: %s FECHA DE CORTE: %s' % (patrimonio, fecha_corte)
 		password = "satelite01"
 		sistema = platform.platform()
-		agregados = ', '.join(CORREOS['CC'])
-		destinatario = CORREOS['TO']
+
+		if sistema.startswith('Windows-10'):
+			agregados = ', '.join(CORREOS['CC'])
+			destinatario = CORREOS['TO']
+		else:
+			agregados = ', '.join(CORREOS['CC2'])
+			destinatario = CORREOS['TO2']
+
 		msg['To'] = destinatario
 		msg['From'] = 'sop01@imagicair.cl'
 		msg['Cc'] = agregados

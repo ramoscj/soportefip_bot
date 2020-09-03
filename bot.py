@@ -53,7 +53,7 @@ async def on_command_error(ctx, error):
 			await ctx.channel.send('Error: Parametro "FECHA DE CORTE" incorrecto!')
 			embed.add_field(name='Ejemplo', value='">comando_a_ejecutar 6 20052020"', inline=False)
 			await ctx.send(embed=embed)
-	else: 
+	else:
 		if mensaje.find("ORA-01840") >= 0 or mensaje.find("ORA-01858") >= 0:
 			await ctx.channel.send('Error: Parametro "FECHA DE CORTE" incorrecto!')
 			embed.add_field(name='Ejemplo', value='">comando_a_ejecutar 6 20052020"', inline=False)
@@ -68,13 +68,12 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 	await ctx.channel.send('Iniciando proceso -> PATRIMONIO: %s FECHA_CORTE: %s, porfavor espere...' % (patrimonio, fecha_corte))
 	try:
 		conexionDB = conexion()
-		totalRegistrosRespaldo = 0
 		entorno = ENTORNO_FIP['DB']
 		dblink = ENTORNO_FIP['DBLINK']
 		# Se crea el cuadro para dar el resumen de los resultados
 		embed = discord.Embed(
 					title='Carga correcta y sin inconsistencias encontradas',
-					description="Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte), 
+					description="Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte),
 					timestamp=datetime.datetime.utcnow(),
 					color=discord.Color.green()
 				)
@@ -151,22 +150,18 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 					await ctx.channel.send('..->Consultando en Reports: ' + mensaje_reports[i] + '...')
 					consulta_db.execute(consulta_reports[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
 					data_reports.append(consulta_db.fetchone())
-			negocios_remesas = data_reports[0][0] + data_reports[1][0]
-			negocios_reports = data_reports[0][0]
-			remesas_reports = data_reports[1][0]
+			negocios_remesas = int(data_reports[0][0]) + int(data_reports[1][0])
+			remesas_reports = int(data_reports[1][0])
+			negocios_reports = int(data_reports[0][0])
 			if  negocios_remesas == 0:
-				# Mensajes para mostrar en panatalla
 				error, recomendado, nota_msj = Mensaje.fip_wrap2_3(patrimonio, fecha_corte)
 			elif remesas_reports == 0:
-				# Mensajes para mostrar en panatalla
-				error, recomendado, nota_msj = Mensaje.fip_wrap3(patrimonio, fecha_corte)
+				error, recomendado, nota_msj = Mensaje.fip_wrap3(negocios_reports, patrimonio, fecha_corte)
 			elif negocios_reports == 0:
-				# Mensajes para mostrar en panatalla
 				error, recomendado, nota_msj = Mensaje.fip_wrap2(patrimonio, fecha_corte)
 			else:
-				# Mensajes para mostrar en panatalla
 				error, recomendado, nota_msj = Mensaje.reports_odi(patrimonio, fecha_corte)
-			if totalRegistrosRespaldo >= 1:
+			if len(registrosRespaldo) >= 1:
 				nota_msj = "Si ya realizo la ejecucion del proceso ODI, espere a que este finalice y luego vuelva a ejecutar la revisión"
 				embed.color = discord.Color.dark_gold()
 			embed.add_field(name='ERROR ENCONTRADO', value=error, inline=False)

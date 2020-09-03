@@ -3,8 +3,8 @@ from consultas import Reports
 class ReportsRev(object):
 
 	def consulta_diario():
-		consultas = (Reports.consultar_negocios(), 
-			Reports.consultar_negocios_cuotas(), 
+		consultas = (Reports.consultar_negocios(),
+			Reports.consultar_negocios_cuotas(),
 			Reports.consultar_movimientos_int_extra(),
 			Reports.consultar_movimientos_financieros(),
 			Reports.consultar_remesas(),

@@ -6,17 +6,17 @@ class Mensaje(object):
         recomendado = "Para retomar el proceso se debe EJECUTAR el ODI para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
         nota_msj = "La informacion ya se encuentra generada en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
         return error, recomendado, nota_msj
-    
+
     def fip_wrap2(patrimonio, fecha_corte):
         error = "La INFORMACION NO ESTA GENERADA en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
         recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 2 (dos) para generar los NEGOCIOS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
         nota_msj = "Las remesas ya se encuentran generados en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
         return error, recomendado, nota_msj
 
-    def fip_wrap3(patrimonio, fecha_corte):
+    def fip_wrap3(negocios, patrimonio, fecha_corte):
         error = "Las REMESAS NO ESTAN GENERADAS en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
         recomendado = "Para retomar el proceso debe ejecutar el FIP_WRAP OPCION 3 (tres) para generar las REMESAS del patrimonio: %s y fecha de corte: %s." % (patrimonio, fecha_corte)
-        nota_msj = "Los Negocios (%s) ya se encuentran generados en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (str(data_reports[0][0]), patrimonio, fecha_corte)
+        nota_msj = "Los Negocios (%s) ya se encuentran generados en la interfaz del REPORTS para el patrimonio: %s y fecha de corte: %s." % (negocios, patrimonio, fecha_corte)
         return error, recomendado, nota_msj
 
     def fip_wrap2_3(patrimonio, fecha_corte):

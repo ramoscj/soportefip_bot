@@ -25,7 +25,7 @@ def crear_csv(nombre_archivo, registros:[]):
         return ("Error: el csv: %s no pudo crearse. %s" % (nombre_archivo, e))
 
 def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
-    
+
     nombre_archivo = 'INCONSISTENCIAS_PAT-%s_FCORT-%s' % (patrimonio, fecha_corte)
     workbook = xlsxwriter.Workbook('%s/csv_data/%s.xlsx' % (PAT_BOT['PATH'], nombre_archivo))
     conexion_db = conexion()

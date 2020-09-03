@@ -4,8 +4,8 @@ class RespaldoRev(object):
 
 	def consulta_diario(entorno, dblink):
 		consultas = (
-			Respaldo.consultarNegocios(entorno, dblink), 
-			Respaldo.consultarCuotasNegocios(entorno, dblink), 
+			Respaldo.consultarNegocios(entorno, dblink),
+			Respaldo.consultarCuotasNegocios(entorno, dblink),
 			Respaldo.consultarMovExtra(entorno, dblink),
 			Respaldo.consultarMovFinancieros(entorno, dblink),
 			Respaldo.consultarRemesa(entorno, dblink),
@@ -59,9 +59,16 @@ class RespaldoRev(object):
 	def consulta_neg_remesas(entorno, dblink):
 		consultas = (
 			Respaldo.consultarNegocios(entorno, dblink),
-			# Respaldo.consultar_negocios_nulos(),
-			# Respaldo.consultar_negocios_nulos()
+			# Respaldo.validarNroNegociosNull(entorno, dblink),
 			Respaldo.consultarRemesa(entorno, dblink)
 			)
 		estado = ('Negocios', 'Remesas')
+		return (consultas, estado)
+
+	def cuadratura_remesas():
+		consultas = (
+			Respaldo.diferencias_remesas(),
+			Respaldo.asientos_contables_duplicados(),
+			)
+		estado = ('Diferencia de Remesas', 'Asientos Contables Duplicados')
 		return (consultas, estado)
