@@ -114,6 +114,61 @@ def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
     except Exception as e:
         raise Exception("Error al crear archivo .XLS. Error: %s" % (e))
 
+def crearXlsDescuadraturas(patrimonio, fechaInicial, fechaFinal, data):
+
+    nombre_archivo = 'DIFERENCIAS-REMESAS_PAT-%s_FCORT-%s_%s' % (patrimonio, fechaInicial, fechaFinal)
+    workbook = xlsxwriter.Workbook('remesas/data/%s.xlsx' % ( nombre_archivo))
+
+    data = data[0]
+    encabezado = data[1]
+    columnas = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K')
+
+    bold = workbook.add_format({'bold': True, 'font_name': 'Arial', 'font_size': 13, 'align': 'center', 'valign': 'vcenter', 'locked': True, 'border': 2, 'bg_color': '#3CB371'})
+    bold2 = workbook.add_format({'bold': True, 'font_name': 'Arial', 'font_size': 10, 'align': 'center', 'valign': 'vcenter', 'locked': True, 'border': 2, 'bg_color': '#FFA500'})
+    bold3 = workbook.add_format({'bold': True, 'font_name': 'Arial', 'font_size': 10, 'align': 'right', 'valign': 'vcenter', 'locked': True, 'border': 2, 'bg_color': '#20CFFF'})
+    bold4 = workbook.add_format({'bold': True, 'font_name': 'Arial', 'font_size': 10, 'align': 'center', 'valign': 'vcenter', 'locked': True, 'border': 2, 'bg_color': '#FFA500'})
+
+    format_data = workbook.add_format({'font_name': 'Arial', 'font_size': 9, 'align': 'center', 'locked': True, 'border': 1})
+
+    try:
+        worksheet = workbook.add_worksheet('DIFERENCIAS_POR_CUENTAS')
+        worksheet.merge_range('A1:K1', 'DESCUADRATURAS ENTRE REMESAS Y MOVIMIENTOS', bold)
+        row = 1
+        col = 0
+        for valor in encabezado:
+            ajustar = '%s%s:%s%s' % (columnas[col], 1, columnas[col], 1)
+            worksheet.set_column(ajustar, 20)
+            worksheet.write(row, col, valor, bold2)
+            col += 1
+        row += 1
+        diaNuevo = ''
+        diaFilaInicio = 3
+        for fila in range(0, len(data)):
+            col = 0
+            if fila > 0:
+                if diaNuevo != data[fila]['REMESA_FECHA_CORTE']:
+                    worksheet.merge_range('A%s:J%s' % (row+1, row+1), 'TOTAL', bold3)
+                    worksheet.write_formula(row, 10, '=SUM(K%s:K%s)' % (diaFilaInicio, row), bold4)
+                    row += 1
+                    diaFilaInicio = row + 1
+            for key, valor in data[fila].items():
+                if type(valor) is datetime.datetime:
+                    valor = valor.strftime("%d/%m/%Y")
+                if valor is None:
+                    valor = 'NULL'
+                worksheet.write(row, col, valor, format_data)
+                col += 1
+            diaNuevo = data[fila]['REMESA_FECHA_CORTE']
+            row += 1
+            if fila == len(data)-1:
+                    worksheet.merge_range('A%s:J%s' % (row+1, row+1), 'TOTAL', bold3)
+                    worksheet.write_formula(row, 10, '=SUM(K%s:K%s)' % (diaFilaInicio, row), bold4)
+        workbook.close()
+        return True
+    except Exception as e:
+        raise Exception('Error en crearXlsDescuadraturas: %s' % e)
+
+
 # consulta_xls, mensaje_xls = RespaldoRev.detalle_valdiario('fip', '')
 # data_xls = crear_xls(4, '12082020', [7], consulta_xls, mensaje_xls)
 # print(data_xls)

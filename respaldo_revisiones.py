@@ -68,7 +68,13 @@ class RespaldoRev(object):
 	def cuadratura_remesas():
 		consultas = (
 			Respaldo.diferencias_remesas(),
+			# Respaldo.test_duplicados(),
 			Respaldo.asientos_contables_duplicados(),
+			Respaldo.diferencias_trx2001(),
+			Respaldo.diferencias_trx2003(),
 			)
-		estado = ('Diferencia de Remesas', 'Asientos Contables Duplicados')
+		estado = ('Diferencia de Remesas', 'Asientos Contables Duplicados', 'Diferencias TRX 2001', 'Diferencias TRX 2003')
 		return (consultas, estado)
+
+# x, y = RespaldoRev.cuadratura_remesas()
+# print(len(x))
