@@ -1,4 +1,5 @@
 from config_bot import PATRIMONIOS_TC, PAT_BOT
+from validar_input import validarFechaCorte, fechaDiaSiguiente
 
 class ScriptSQL(object):
 
@@ -66,7 +67,7 @@ class ScriptSQL(object):
                     "    ( SELECT FN.NUM_CTA_CREDITO, FN.COD_CLIENTE, FN.COD_EXTRAFIN, FN.FECHA_CORTE, MIN(FN.ROWID)\n"
                     "            FROM FIP.FIP_DIARIO_CUOTANEGOCIOS FN\n"
                     "            WHERE FN.FECHA_CORTE = TO_DATE('"+ fecha_corte + "', 'DDMMYYYY')\n"
-                    "            AND FN.CODIGO_PATRIMONIO = "+ str(pat) + "\n"
+                    "            AND FN.CODIGO_PATRIMONIO = "+ str(pat) +"\n"
                     "            HAVING COUNT(1) > 1\n"
                     "            GROUP BY FN.NUM_CTA_CREDITO, FN.COD_CLIENTE, FN.COD_EXTRAFIN, FN.FECHA_CORTE, NVL(FN.NUM_CUOTA, 0) )\n"
                     "    AND FRC.CODIGO_PATRIMONIO = "+ str(pat) + "\n"
@@ -260,4 +261,68 @@ class ScriptSQL(object):
             ]
         return texto_sql
 
-# print(ScriptSQL.crear(7, 4, '04062020', 5))
+class ScriptSqlUpdateTrx(object):
+
+    def crearSql(patrimonio, fechasConDiferencias):
+        try:
+            archivoTrx2001 = "remesas/scripts_sql/ACTUALIZA_TRX_2001_PAT-%s_%s-%s.sql" % (str(patrimonio), str(fechasConDiferencias[0]), str(fechasConDiferencias[-1]))
+            archivoTrx2003 = "remesas/scripts_sql/ACTUALIZA_TRX_2003_PAT-%s_%s-%s.sql" % (str(patrimonio), str(fechasConDiferencias[0]), str(fechasConDiferencias[-1]))
+
+            with open(archivoTrx2001, "w") as archivo:
+                for fecha in fechasConDiferencias:
+                    texto = ScriptSqlUpdateTrx.scriptUpdateTrx2001(patrimonio, fecha)
+                    archivo.writelines(texto)
+                archivo.writelines("COMMIT;\n")
+
+            with open(archivoTrx2003, "w") as archivo:
+                for fecha in fechasConDiferencias:
+                    texto = ScriptSqlUpdateTrx.scriptUpdateTrx2003(patrimonio, fecha)
+                    archivo.writelines(texto)
+                archivo.writelines("COMMIT;\n")
+        except Exception as e:
+            raise Exception('Error en ScriptSqlUpdateTrx: %s' % e)
+
+    def scriptUpdateTrx2001(patrimonio, fechaCorte):
+        texto_sql = [
+                    "-- DIA: " + fechaCorte + "\n"
+                    "update fip.fip_mov_financieros mo set mo.mon_movimiento =\n"
+                    "  (select remesa.monto_rem + nvl(movimientos.monto_mov,0) total from\n"
+                    "      (select sum(re.red_monto_movimiento) monto_rem\n"
+                    "            from fip.fip_detalle_remesa_ic re where re.rem_patrimonio = "+ str(patrimonio) +"\n"
+                    "            and re.red_fecha_corte between TO_DATE('"+ fechaCorte +"', 'DDMMYYYY') and TO_DATE('"+ fechaCorte +"', 'DDMMYYYY')\n"
+                    "            and re.red_tipo_movimiento in (4,16)) remesa,\n"
+                    "      (select sum(-1* mov.monto) monto_mov\n"
+                    "          from fip.fip_movimientos_diarios mov where mov.codigo_patrimonio = "+ str(patrimonio) +"\n"
+                    "          and mov.fecha_movimiento between TO_DATE('"+ fechaCorte +"', 'DDMMYYYY') and TO_DATE('"+ fechaCorte +"', 'DDMMYYYY')\n"
+                    "          and mov.tipo_movimiento in (14)\n"
+                    "          and mov.numero_remesa is not null) movimientos\n"
+                    "  )\n"
+                    "where mo.fec_movimiento between TO_DATE('"+ fechaCorte +"', 'DDMMYYYY') and TO_DATE('"+ fechaCorte +"', 'DDMMYYYY')\n"
+                    "and   mo.codigo_patrimonio = "+ str(patrimonio) +"\n"
+                    "and   mo.tip_transaccion = 2\n"
+                    "and   mo.tip_subtransac  = 2001\n"
+                    "and   mo.est_movimiento  = 'AC';\n"
+                    "\n"
+            ]
+        return texto_sql
+
+    def scriptUpdateTrx2003(patrimonio, fechaCorte):
+        texto_sql = [
+                    "-- DIA: " + fechaCorte + "\n"
+                    "update fip.fip_mov_financieros mo set mo.mon_movimiento =\n"
+                    "  (select sum(re.red_monto_movimiento) monto_rem\n"
+                    "      from fip.fip_detalle_remesa_ic re where re.rem_patrimonio = "+ str(patrimonio) +"\n"
+                    "      and re.red_fecha_corte\n"
+                    "      between TO_DATE('"+ fechaCorte +"', 'DDMMYYYY') and TO_DATE('"+ fechaCorte +"', 'DDMMYYYY')\n"
+                    "      and re.red_tipo_movimiento in (6)\n"
+                    "  )\n"
+                    "where mo.fec_movimiento between TO_DATE('"+ fechaCorte + "', 'DDMMYYYY') and TO_DATE('"+ fechaCorte +"', 'DDMMYYYY')\n"
+                    "and   mo.codigo_patrimonio = "+ str(patrimonio) +"\n"
+                    "and   mo.tip_transaccion = 2\n"
+                    "and   mo.tip_subtransac  = 2003\n"
+                    "and   mo.est_movimiento  = 'AC';\n"
+                    "\n"
+            ]
+        return texto_sql
+
+# print(ScriptSqlUpdateTrx.crearSql(4, '01092020', '05092020'))

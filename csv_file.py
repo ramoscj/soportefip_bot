@@ -114,13 +114,13 @@ def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
     except Exception as e:
         raise Exception("Error al crear archivo .XLS. Error: %s" % (e))
 
-def crearXlsDescuadraturas(patrimonio, fechaInicial, fechaFinal, data):
+def crearXlsDescuadraturas(patrimonio, fechaInicial, fechaFinal, cuentasConDiferencias, diferenciaRemesaTrx, movimientosDuplicados):
 
     nombre_archivo = 'DIFERENCIAS-REMESAS_PAT-%s_FCORT-%s_%s' % (patrimonio, fechaInicial, fechaFinal)
     workbook = xlsxwriter.Workbook('remesas/data/%s.xlsx' % ( nombre_archivo))
 
-    data = data[0]
-    encabezado = data[1]
+    cuentasConDiferencias = cuentasConDiferencias[0]
+    encabezado = cuentasConDiferencias[1]
     columnas = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K')
 
     bold = workbook.add_format({'bold': True, 'font_name': 'Arial', 'font_size': 13, 'align': 'center', 'valign': 'vcenter', 'locked': True, 'border': 2, 'bg_color': '#3CB371'})
@@ -143,26 +143,55 @@ def crearXlsDescuadraturas(patrimonio, fechaInicial, fechaFinal, data):
         row += 1
         diaNuevo = ''
         diaFilaInicio = 3
-        for fila in range(0, len(data)):
+        for fila in range(0, len(cuentasConDiferencias)):
             col = 0
             if fila > 0:
-                if diaNuevo != data[fila]['REMESA_FECHA_CORTE']:
+                if diaNuevo != cuentasConDiferencias[fila]['REMESA_FECHA_CORTE']:
                     worksheet.merge_range('A%s:J%s' % (row+1, row+1), 'TOTAL', bold3)
                     worksheet.write_formula(row, 10, '=SUM(K%s:K%s)' % (diaFilaInicio, row), bold4)
                     row += 1
                     diaFilaInicio = row + 1
-            for key, valor in data[fila].items():
+            for key, valor in cuentasConDiferencias[fila].items():
                 if type(valor) is datetime.datetime:
                     valor = valor.strftime("%d/%m/%Y")
                 if valor is None:
                     valor = 'NULL'
                 worksheet.write(row, col, valor, format_data)
                 col += 1
-            diaNuevo = data[fila]['REMESA_FECHA_CORTE']
+            diaNuevo = cuentasConDiferencias[fila]['REMESA_FECHA_CORTE']
             row += 1
-            if fila == len(data)-1:
+            if fila == len(cuentasConDiferencias)-1:
                     worksheet.merge_range('A%s:J%s' % (row+1, row+1), 'TOTAL', bold3)
                     worksheet.write_formula(row, 10, '=SUM(K%s:K%s)' % (diaFilaInicio, row), bold4)
+
+        worksheet2 = workbook.add_worksheet('DIFERENCIAS_REMESAS_TRX')
+        worksheet2.merge_range('A1:E1', 'REMESAS Y TRX', bold)
+        encabezadoRemesaTrx = ['FECHA', 'MONTO_TRX', 'MONTO_REMESA', 'MOV_DUPLICADOS', 'TOTAL']
+        row = 1
+        col = 0
+        for fila in encabezadoRemesaTrx:
+            ajustar = '%s%s:%s%s' % (columnas[col], 2, columnas[col], 2)
+            worksheet2.set_column(ajustar, 20)
+            worksheet2.write(row, col, fila, bold2)
+            col += 1
+        row += 1
+        for key, valor in diferenciaRemesaTrx.items():
+            col = 0
+            worksheet2.write(row, col, key, format_data)
+            col += 1
+            worksheet2.write(row, col, valor['DIFERENCIA_TRX'], format_data)
+            col += 1
+            worksheet2.write(row, col, valor['DIFERENCIA_REMESA'], format_data)
+            col += 1
+            if movimientosDuplicados.get(key):
+                worksheet2.write(row, col, 'SI', format_data)
+                col += 1
+            else:
+                worksheet2.write(row, col, 'NO', format_data)
+                col += 1
+            worksheet2.write_formula(row, col, '=SUM(B%s:C%s)' % (col-1, col-2), bold4)
+            row += 1
+
         workbook.close()
         return True
     except Exception as e:
