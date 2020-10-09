@@ -130,6 +130,10 @@ class Respaldo(object):
 		consulta = "SELECT count(1) from fip.fip_cuenta_credito_ic fcci, (select a.num_cta_ic, b.cod_cliente, b.cod_empresa, b.fec_inclusion from tc.tc_cambioprod_enc a, tc.tc_cuenta_credito b where a.fec_estado between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') + .99999 and a.ind_estado = 'F'and b.num_cta_credito = a.num_cta_credito and b.cod_empresa = a.cod_empresa and exists (select 1 from fip.fip_patrimonios fp, fip.fip_cartera_clasificada fn where fp.empresa = a.cod_empresa and fp.estado_patrimonio = 'A' and fn.codigo_patrimonio = fp.codigo_patrimonio and fn.codigo_cliente = b.cod_cliente and fp.codigo_patrimonio_ic = :pat_consulta) group by a.num_cta_ic, b.cod_cliente, b.cod_empresa, b.fec_inclusion) cuentasTC WHERE fcci.cta_num_cta_credito = cuentasTC.num_cta_ic AND fcci.cta_cod_cliente = cuentasTC.cod_cliente"
 		return consulta
 
+	def validarProcesoExistente():
+		consulta = "SELECT COUNT(1) FROM fip.fip_extra_ic WHERE EXT_CODIGO_PATRIMONIO = :pat_consulta AND EXT_FECHA_CORTE BETWEEN to_date(:fecha_consulta, 'ddmmyyyy') AND to_date(:fecha_consulta, 'ddmmyyyy') + .99999 AND EXT_TIPO_PROCESO = 'CN'"
+		return consulta
+
 	# CONSULTAS OBTENER REGISTROS CON ERRORES *********************************
 
 	def detalle_negocios_null(entorno, dblink):

@@ -65,14 +65,14 @@ async def on_command_error(ctx, error):
 async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 	registrosRespaldo = []
 	nota = False
-	await ctx.channel.send('Iniciando proceso -> PATRIMONIO: %s FECHA_CORTE: %s, porfavor espere...' % (patrimonio, fecha_corte))
+	await ctx.channel.send(':regional_indicator_i::regional_indicator_n::regional_indicator_i::regional_indicator_c::regional_indicator_i::regional_indicator_o:  -> PATRIMONIO: %s FECHA_CORTE: %s, porfavor espere...' % (patrimonio, fecha_corte))
 	try:
 		conexionDB = conexion()
 		entorno = ENTORNO_FIP['DB']
 		dblink = ENTORNO_FIP['DBLINK']
 		# Se crea el cuadro para dar el resumen de los resultados
 		embed = discord.Embed(
-					title='Carga correcta y sin inconsistencias encontradas',
+					title=':hugging: Carga correcta y sin inconsistencias encontradas :thumbsup:',
 					description="Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte),
 					timestamp=datetime.datetime.utcnow(),
 					color=discord.Color.green()
@@ -83,7 +83,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 		# Revision para el aptrimonio y fecha de corte
 		with conexionDB.cursor() as consulta_db:
 			for i in range(0, len(consultaDiario)):
-				await ctx.channel.send('->Consultando ' + mensaje[i] + '...')
+				await ctx.channel.send(':fast_forward: Consultando ' + ':white_check_mark: ' + mensaje[i])
 				consulta_db.execute(consultaDiario[i], pat_consulta= patrimonio, fecha_consulta= fecha_corte)
 				resultado = consulta_db.fetchone()
 				if resultado[0] > 0:
@@ -92,14 +92,13 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 
 		if len(registrosRespaldo) == 6:
 			erroresEncontrados = []
-			await ctx.channel.send('Existen registros para el patrimonio: ' + str(patrimonio) + ' fecha de corte: ' + fecha_corte)
-			await ctx.channel.send('_')
-			await ctx.channel.send ('Iniciando revision de la DATA:')
+			await ctx.channel.send(':bar_chart: Existen registros para el patrimonio: ' + str(patrimonio) + ' fecha de corte: ' + fecha_corte)
+			await ctx.channel.send ('.:regional_indicator_r::regional_indicator_e::regional_indicator_v::regional_indicator_i::regional_indicator_s::regional_indicator_i::regional_indicator_o::regional_indicator_n:  :regional_indicator_d::regional_indicator_e:  :regional_indicator_l::regional_indicator_a:  :regional_indicator_d::regional_indicator_a::regional_indicator_t::regional_indicator_a:')
 			# Consultas SQL y texto para seguimiento
 			consultaValidarCarga, mensajeValidacion = RespaldoRev.validaciones_diario(entorno, dblink)
 			with conexionDB.cursor() as consulta_db:
 				for i in range(0, len(consultaValidarCarga)):
-					await ctx.channel.send('->Consultando ' + mensajeValidacion[i] + '...')
+					await ctx.channel.send(':fast_forward: Consultando :white_check_mark: ' + mensajeValidacion[i])
 					if i == 7:
 						patTC = PATRIMONIOS_TC.get(patrimonio)
 						consulta_db.execute(consultaValidarCarga[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte, pat_consultatc= patTC)
@@ -107,8 +106,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 						consulta_db.execute(consultaValidarCarga[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
 					resultado = consulta_db.fetchone()
 					erroresEncontrados.append(resultado[0])
-			await ctx.channel.send('Fin de las validaciones')
-			await ctx.channel.send('_')
+			await ctx.channel.send('.:regional_indicator_f::regional_indicator_i::regional_indicator_n:  :regional_indicator_d::regional_indicator_e:  :regional_indicator_l::regional_indicator_a:  :regional_indicator_r::regional_indicator_e::regional_indicator_v::regional_indicator_i::regional_indicator_s::regional_indicator_i::regional_indicator_o::regional_indicator_n:')
 			# erroresEncontrados = [(1,),(1,),(1,),(1,),(1,)]
 			archivoSqlAdjunto = []
 			archivo_sql = 0
@@ -116,14 +114,19 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			# Bloque para agregar las inconsistencias a la salida por pantalla
 			for i in range(0, len(erroresEncontrados)):
 				if erroresEncontrados[i] > 0:
-					embed.add_field(name= mensajeValidacion[i], value= str(erroresEncontrados[i]), inline= False)
-					embed.title = 'Carga completa pero con inconsistencias encontradas'
+					embed.add_field(name= ':x: %s' % mensajeValidacion[i], value= str(erroresEncontrados[i]), inline= False)
+					embed.title = ':thinking: Carga completa pero con inconsistencias encontradas :thumbsdown:'
 					embed.color = discord.Color.red()
 					# Script para corregir inconsistencia
 					if i != 8:
 						if ScriptSQL.crear(i, patrimonio, fecha_corte, erroresEncontrados[i]):
 							archivo_sql += 1
 							archivoSqlAdjunto.append(i)
+					else:
+						error = 'El Patrimonio: %s fecha de corte: %s tiene una ejeucion en el SATELITE.' % (patrimonio, fecha_corte)
+						recomendaciones = 'Si no reconoce esta ejeucion y desea realizar una nueva favor informar al correo: sop01@imagicair.cl y solicite script para realizar el borrado del proceso existente.'
+						embed.add_field(name=':no_entry_sign: ERROR ENCONTRADO', value=error, inline=False)
+						embed.add_field(name=':loudspeaker: RECOMENDACIONES', value=recomendaciones, inline=False)
 						#Parametro para controlar los archivos que se adjuntaran al correo
 			# Bloque para enviar correo
 			if len(archivoSqlAdjunto) > 0:
@@ -133,12 +136,12 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 					archivo_xls += 1
 				# Se envia correo con las indicaciones
 				repuesta = Correo.enviar(archivoSqlAdjunto, patrimonio, fecha_corte)
-				respuesta_embed = 'Se envio un correo a la direccion %s con %s archivo .XLSX y %s scripts .SQL con las indicaciones para realizar las correcciones.' % (repuesta, str(archivo_xls), str(archivo_sql))
+				respuesta_embed = 'Se envio un correo a la direccion: :incoming_envelope: %s con %s archivo .XLSX y %s scripts .SQL con las indicaciones para realizar las correcciones.' % (repuesta, str(archivo_xls), str(archivo_sql))
 				embed.add_field(name='NOTA', value=respuesta_embed, inline=False)
 		else:
 			dblink_reports = ENTORNO_REPORTS['DBLINK']
-			await ctx.channel.send('-')
-			embed.title = 'Carga de la información para realizar revisón INCOMPLETA'
+			await ctx.channel.send(':x: No existen registros para el patrimonio: ' + str(patrimonio) + ' fecha de corte: ' + fecha_corte)
+			embed.title = ':dizzy_face: Carga de la información para realizar revisón INCOMPLETA :thumbsdown:'
 			embed.color = discord.Color.red()
 			# Consultas SQL y texto para seguimiento
 			consulta_reports, mensaje_reports = RespaldoRev.consulta_neg_remesas('reports', dblink_reports)
@@ -147,7 +150,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			await ctx.channel.send('Consultas adicionales...')
 			with conexionDB.cursor() as consulta_db:
 				for i in range(0, len(consulta_reports)):
-					await ctx.channel.send('..->Consultando en Reports: ' + mensaje_reports[i] + '...')
+					await ctx.channel.send(':fast_forward: Consultando en Reports: ' + mensaje_reports[i])
 					consulta_db.execute(consulta_reports[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
 					data_reports.append(consulta_db.fetchone())
 			negocios_remesas = int(data_reports[0][0]) + int(data_reports[1][0])
@@ -164,13 +167,13 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			if len(registrosRespaldo) >= 1:
 				nota_msj = "Si ya realizo la ejecucion del proceso ODI, espere a que este finalice y luego vuelva a ejecutar la revisión"
 				embed.color = discord.Color.dark_gold()
-			embed.add_field(name='ERROR ENCONTRADO', value=error, inline=False)
-			embed.add_field(name='RECOMENDACIONES', value=recomendado, inline=False)
-			embed.add_field(name='NOTA', value=nota_msj, inline=False)
+			embed.add_field(name=':no_entry_sign: ERROR ENCONTRADO', value=error, inline=False)
+			embed.add_field(name=':loudspeaker: RECOMENDACIONES', value=recomendado, inline=False)
+			embed.add_field(name=':memo: NOTA', value=nota_msj, inline=False)
 		await ctx.send(embed=embed)
 	except Exception as e:
 		embed = discord.Embed(
-				title='Error no manejado',
+				title='Error no manejado :person_facepalming:',
 				description='%s' % e,
 				color=discord.Color.dark_red()
 				)

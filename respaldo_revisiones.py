@@ -27,10 +27,10 @@ class RespaldoRev(object):
 			# Respaldo.count_remesas(entorno, dblink),
 			Respaldo.validarMovSinCuota(entorno, dblink),
 			Respaldo.validarClienteDuplicadoTc(),
-			Respaldo.validarCuentasMigradasDuplicadas()
+			Respaldo.validarProcesoExistente()
 			# Respaldo.count_remesas(entorno, dblink)
 		)
-		estado = ('Negocios con tipo de documento NULL', 'Negocios duplicados', 'Cuotas duplicadas', 'Cuotas sin Negocio', 'Numero de Negocio NULL', 'Movimientos sin cuotas Extrafin', 'Movimientos sin cuotas', 'Clientes duplicados en TC', 'Cuentas Migradas Duplicadas')
+		estado = ('Negocios con tipo de documento NULL', 'Negocios duplicados', 'Cuotas duplicadas', 'Cuotas sin Negocio', 'Numero de Negocio NULL', 'Movimientos sin cuotas Extrafin', 'Movimientos sin cuotas', 'Clientes duplicados en TC', 'Existen Registros')
 		return (consultas, estado)
 
 	def detalle_valdiario(entorno, dblink):

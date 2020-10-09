@@ -36,11 +36,11 @@ class Correo(object):
 		sistema = platform.platform()
 
 		if sistema.startswith('Windows-10'):
-			agregados = ', '.join(CORREOS['CC'])
-			destinatario = CORREOS['TO']
-		else:
 			agregados = ', '.join(CORREOS['CC2'])
 			destinatario = CORREOS['TO2']
+		else:
+			agregados = ', '.join(CORREOS['CC'])
+			destinatario = CORREOS['TO']
 
 		msg['To'] = destinatario
 		msg['From'] = 'sop01@imagicair.cl'
@@ -56,7 +56,7 @@ class Correo(object):
 		mensaje += '<h3 style="color: #2b2301;">Para corregir las inconsistencia se recomienda:</h3>'
 		mensaje += '<ol style="line-height: 32px;">'
 		mensaje += '<li style="clear: both;">Ejecutar los scripts .SQL enviados en orden.</li>'
-		mensaje += '<li style="clear: both;">Ralizar nuevamente la revisión para confirmar que no existan errores.</li>'
+		mensaje += '<li style="clear: both;">Realizar nuevamente la revisión para confirmar que no existan errores.</li>'
 		mensaje += '<li style="clear: both;">Iniciar con el proceso diario.</li></ol>'
 		mensaje += '<p><strong>&nbsp;</strong></p>'
 		mensaje += '<p><strong>Nota: </strong>Si tiene alguna duda con las  indicaciones enviadas por favor enviar un correo electronico a la direccion: <strong>sop01@imagicair.cl</strong><br/></p>'
