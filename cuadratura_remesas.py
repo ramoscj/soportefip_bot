@@ -115,7 +115,7 @@ def DiferenciasAsientosContables(patrimonio, fechaCorte):
 	except Exception as e:
 		raise Exception('Error en DiferenciasAsientosContables: %s' % e)
 
-print(CuadraturasRemesas(10, '16092020', '30092020'))
+print(CuadraturasRemesas(10, '16112020', '30112020'))
 # print(crearXlsDescuadraturas(6, '01092020', '05092020', z[0], z[1]))
 # x, y = DiferenciasRemesas(6, '01012020', '20012020')
 # for a in x.keys():

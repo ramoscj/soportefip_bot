@@ -45,7 +45,7 @@ class RespaldoRev(object):
 			[
 				Respaldo.detalle_clienteDuplicado_tc(),
 				Respaldo.detalle_clienteFipCuentas(),
-				Respaldo.detalle_clienteDiarioNegocios(entorno, dblink),
+				Respaldo.detalle_clienteDiarioNegocios(),
 				Respaldo.detalle_clienteFipExtraIc(),
 				Respaldo.detalle_clienteFipNegocios(),
 				Respaldo.detalle_clienteFipCuentaCredito()
