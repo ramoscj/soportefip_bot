@@ -72,7 +72,7 @@ def testClienteDuplicado():
 
 
 patrimonio = 4
-fecha_corte = '18012019'
+fecha_corte = '09082018'
 revisiones = [7]
 consultas, mensaje = RespaldoRev.detalle_valdiario('FIP', '')
 print(crear_xls(patrimonio, fecha_corte, revisiones, consultas, mensaje))

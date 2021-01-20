@@ -83,12 +83,14 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 		# Revision para el aptrimonio y fecha de corte
 		with conexionDB.cursor() as consulta_db:
 			for i in range(0, len(consultaDiario)):
-				await ctx.channel.send(':fast_forward: Consultando ' + ':white_check_mark: ' + mensaje[i])
 				consulta_db.execute(consultaDiario[i], pat_consulta= patrimonio, fecha_consulta= fecha_corte)
 				resultado = consulta_db.fetchone()
 				if resultado[0] > 0:
 					registrosRespaldo.append(resultado[0])
 					embed.add_field(name= mensaje[i], value= resultado[0], inline= True)
+					await ctx.channel.send(':fast_forward: Consultando ' + ':white_check_mark: ' + mensaje[i])
+				else:
+					await ctx.channel.send(':fast_forward: Consultando ' + ':x: ' + mensaje[i])
 
 		if len(registrosRespaldo) == 6:
 			erroresEncontrados = []
@@ -98,14 +100,17 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			consultaValidarCarga, mensajeValidacion = RespaldoRev.validaciones_diario(entorno, dblink)
 			with conexionDB.cursor() as consulta_db:
 				for i in range(0, len(consultaValidarCarga)):
-					await ctx.channel.send(':fast_forward: Consultando :white_check_mark: ' + mensajeValidacion[i])
-					if i == 7:
+					if i == 8:
 						patTC = PATRIMONIOS_TC.get(patrimonio)
 						consulta_db.execute(consultaValidarCarga[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte, pat_consultatc= patTC)
 					else:
 						consulta_db.execute(consultaValidarCarga[i], pat_consulta=patrimonio, fecha_consulta=fecha_corte)
 					resultado = consulta_db.fetchone()
 					erroresEncontrados.append(resultado[0])
+					if resultado[0] > 0:
+						await ctx.channel.send(':fast_forward: Consultando :x: ' + mensajeValidacion[i])
+					else:
+						await ctx.channel.send(':fast_forward: Consultando :white_check_mark: ' + mensajeValidacion[i])
 			await ctx.channel.send('.:regional_indicator_f::regional_indicator_i::regional_indicator_n:  :regional_indicator_d::regional_indicator_e:  :regional_indicator_l::regional_indicator_a:  :regional_indicator_r::regional_indicator_e::regional_indicator_v::regional_indicator_i::regional_indicator_s::regional_indicator_i::regional_indicator_o::regional_indicator_n:')
 			# erroresEncontrados = [(1,),(1,),(1,),(1,),(1,)]
 			archivoSqlAdjunto = []
@@ -118,7 +123,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 					embed.title = ':thinking: Carga completa pero con inconsistencias encontradas :thumbsdown:'
 					embed.color = discord.Color.red()
 					# Script para corregir inconsistencia
-					if i != 8:
+					if i != 9:
 						if ScriptSQL.crear(i, patrimonio, fecha_corte, erroresEncontrados[i]):
 							archivo_sql += 1
 							archivoSqlAdjunto.append(i)
@@ -127,7 +132,6 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 						recomendaciones = 'Si no reconoce esta ejeucion y desea realizar una nueva favor informar al correo: sop01@imagicair.cl y solicite script para realizar el borrado del proceso existente.'
 						embed.add_field(name=':no_entry_sign: ERROR ENCONTRADO', value=error, inline=False)
 						embed.add_field(name=':loudspeaker: RECOMENDACIONES', value=recomendaciones, inline=False)
-						#Parametro para controlar los archivos que se adjuntaran al correo
 			# Bloque para enviar correo
 			if len(archivoSqlAdjunto) > 0:
 				consultaErrorData, mensajeErrorData = RespaldoRev.detalle_valdiario(entorno, dblink)

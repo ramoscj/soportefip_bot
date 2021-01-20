@@ -37,6 +37,7 @@ def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
         'NUMERO DE NEGOCIO NULL',
         'MOVIMIENTOS INTERES EXTRAFIN SIN CUOTAS (006)',
         'MOVIMIENTOS SIN CUOTAS (004, 007, 008, 009, 010, 011, 014, 016)',
+        'NEGOCIOS SIN CUENTAS',
         'CLIENTES DUPLICADOS PATRIMONIOS TC'
     )
     TablasClientesDup = [
@@ -62,10 +63,10 @@ def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
             # Ingresando el titulo de cada hoja
             worksheet.merge_range('A1:F1', '%s' % titulos[revisiones[i]], bold)
             # Inmovilizar paneles
-            worksheet.freeze_panes('A3')
+            # worksheet.freeze_panes('A2')
             # Ajustar ancho de columnas
             with conexion_db.cursor() as cursor:
-                if revisiones[i] == 7:
+                if revisiones[i] == 8:
                     for k in range(0,len(consultas[revisiones[i]])):
                         patTC = PATRIMONIOS_TC.get(patrimonio)
                         cursor.execute(consultas[revisiones[i]][k], pat_consulta=patrimonio, fecha_consulta=fecha_corte, pat_consultatc=patTC)

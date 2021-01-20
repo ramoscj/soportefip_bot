@@ -24,24 +24,25 @@ class RespaldoRev(object):
 			Respaldo.validarCuotasSinNegocio(entorno, dblink),
 			Respaldo.validarNroNegociosNull(entorno, dblink),
 			Respaldo.validarMovSinCuotaExtra(entorno, dblink),
-			# Respaldo.count_remesas(entorno, dblink),
 			Respaldo.validarMovSinCuota(entorno, dblink),
+			Respaldo.count_remesas(entorno, dblink),
+			# Respaldo.validarNegociosSinCuenta(),
 			Respaldo.validarClienteDuplicadoTc(),
 			Respaldo.validarProcesoExistente()
-			# Respaldo.count_remesas(entorno, dblink)
 		)
-		estado = ('Negocios con tipo de documento NULL', 'Negocios duplicados', 'Cuotas duplicadas', 'Cuotas sin Negocio', 'Numero de Negocio NULL', 'Movimientos sin cuotas Extrafin', 'Movimientos sin cuotas', 'Clientes duplicados en TC', 'Existen Registros')
+		estado = ('Negocios con tipo de documento NULL', 'Negocios duplicados', 'Cuotas duplicadas', 'Cuotas sin Negocio', 'Numero de Negocio NULL', 'Movimientos sin cuotas Extrafin', 'Movimientos sin cuotas', 'Negocios Sin Cuentas', 'Clientes duplicados en TC', 'Existen Registros')
 		return (consultas, estado)
 
 	def detalle_valdiario(entorno, dblink):
 		consultas = (
-			Respaldo.remesas_cantidad(entorno, dblink),
+			Respaldo.detalle_negocios_null(entorno, dblink),
 			Respaldo.detalle_negocios_duplicados(entorno, dblink),
 			Respaldo.detalle_cuotas_cuplicadas(entorno, dblink),
 			Respaldo.detalle_cuotas_snegocio(entorno, dblink),
 			Respaldo.detalle_negociosNull(entorno, dblink),
 			Respaldo.detalle_mov_sincuotasV006(entorno, dblink),
 			Respaldo.detalle_mov_sincuotasV016(entorno, dblink),
+			Respaldo.detalle_NegocioSinCuenta(),
 			[
 				Respaldo.detalle_clienteDuplicado_tc(),
 				Respaldo.detalle_clienteFipCuentas(),
@@ -53,7 +54,7 @@ class RespaldoRev(object):
 				# Respaldo.remesas_cantidad(entorno, dblink)
 			]
 		)
-		estado = ('NEG_NULL', 'NEG_DUPLICADOS', 'CUO_DUPLICADAS', 'CUO_SNEGOCIO', 'NRO_NEGNULL', 'MOVEXTRA_SCUOTA', 'MOV_SCUOTA', 'CLIENTE_DUP_TC')
+		estado = ('NEG_NULL', 'NEG_DUPLICADOS', 'CUO_DUPLICADAS', 'CUO_SNEGOCIO', 'NRO_NEGNULL', 'MOVEXTRA_SCUOTA', 'MOV_SCUOTA', 'NEG_SIN_CUENTA', 'CLIENTE_DUP_TC')
 		return (consultas, estado)
 
 	def consulta_neg_remesas(entorno, dblink):

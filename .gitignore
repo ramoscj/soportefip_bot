@@ -1,6 +1,9 @@
 *.XLSX
 *.tsql
 *.sql
-__pycache__/
+__pycache__\
 *.xlsx
 *.pyc
+bot_project.code-workspace
+.vscode/
+bot_token.py
