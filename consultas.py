@@ -136,8 +136,13 @@ class Respaldo(object):
 		return consulta
 
 	def detalle_NegocioSinCuenta():
+		consulta = "SELECT DISTINCT count(num_cta_credito) FROM fip_diario_negocios fn WHERE fn.fecha_corte = to_date(:fecha_consulta, 'ddmmyyyy') AND fn.codigo_patrimonio = :pat_consulta AND (fn.num_cta_credito ) NOT IN (SELECT sn.num_cta_credito FROM fip_diario_negocios sn, fip_cuenta_credito_ic cc WHERE sn.num_cta_credito = cc.cta_num_cta_credito AND sn.cod_cliente = cc.cta_cod_cliente AND sn.cod_empresa = cc.cta_cod_empresa AND sn.fecha_corte = to_date(:fecha_consulta, 'ddmmyyyy') AND sn.codigo_patrimonio = :pat_consulta group by sn.num_cta_credito)"
+		return consulta
+
+	def detalle_NegocioSinCuentaGlobal():
 		consulta = "select fn.num_cta_credito, fn.cod_cliente, fn.cod_extrafin, fn.fecha_corte from reports.fip_diario_negocios@kamet.din.cl fn where fn.fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') and fn.codigo_patrimonio = :pat_consulta and (fn.num_cta_credito, fn.cod_cliente, fn.cod_extrafin, fn.fecha_corte) not in (select sn.num_cta_credito, sn.cod_cliente, sn.cod_extrafin, sn.fecha_corte from reports.fip_diario_negocios@kamet.din.cl sn, fip.fip_cuenta_credito_ic cc where sn.num_cta_credito = cc.cta_num_cta_credito and sn.cod_cliente = cc.cta_cod_cliente and sn.cod_empresa = cc.cta_cod_empresa and sn.fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') and sn.codigo_patrimonio = :pat_consulta union select neg.num_cta_credito, neg.cod_cliente, neg.cod_extrafin, neg.fecha_corte from reports.fip_diario_negocios@kamet.din.cl neg, (select a.num_cta_ic , b.cod_cliente , b.fec_inclusion, a.fec_estado from tc_cambioprod_enc a, tc_cuenta_credito b where a.fec_estado between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') + .99999 and a.ind_estado = 'f'and b.num_cta_credito = a.num_cta_credito and b.cod_empresa = a.cod_empresa and exists (select 1 from fip.fip_patrimonios fp, fip.fip_cartera_clasificada fn where fp.empresa = a.cod_empresa and fp.estado_patrimonio = 'a'and fn.codigo_patrimonio = fp.codigo_patrimonio and fn.codigo_cliente = b.cod_cliente and fp.codigo_patrimonio_ic = :pat_consulta ) group by a.num_cta_ic, b.cod_cliente, b.cod_empresa, b.fec_inclusion, a.fec_estado ) migrados where neg.num_cta_credito = migrados.num_cta_ic and   neg.cod_cliente = migrados.cod_cliente and   neg.fecha_corte between to_date(:fecha_consulta, 'ddmmyyyy') and to_date(:fecha_consulta, 'ddmmyyyy') and neg.codigo_patrimonio = :pat_consulta ) group by fn.num_cta_credito, fn.cod_cliente, fn.cod_extrafin, fn.fecha_corte"
 		return consulta
+
 
 	# CONSULTAS OBTENER REGISTROS CON ERRORES *********************************
 

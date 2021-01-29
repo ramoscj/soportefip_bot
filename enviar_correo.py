@@ -34,19 +34,10 @@ class Correo(object):
 		]
 		# Parametros para enviar correo
 		asunto = 'Revision de DATA para el proceso FIP_EJEC_DIARIO PATRIMONIO: %s FECHA DE CORTE: %s' % (patrimonio, fecha_corte)
-		password = "satelite01"
-		sistema = platform.platform()
-
-		if sistema.startswith('Windows-10'):
-			# agregados = ', '.join(CORREOS['CC2'])
-			agregados = ''
-			destinatario = CORREOS['TO2']
-		else:
-			agregados = ', '.join(CORREOS['CC'])
-			destinatario = CORREOS['TO']
-
-		msg['To'] = destinatario
-		msg['From'] = 'sop01@imagicair.cl'
+		password = CORREOS['PASSWD']
+		agregados = ', '.join(CORREOS['CC'])
+		msg['To'] = CORREOS['TO']
+		msg['From'] = CORREOS['FROM']
 		msg['Cc'] = agregados
 		msg['Subject'] = asunto
 		envio = datetime.datetime.now()
@@ -102,7 +93,7 @@ class Correo(object):
 					segundoCorreo += 1
 
 			# Se envia el correo
-			correos = agregados.split(',') + [destinatario]
+			correos = agregados.split(',') + [CORREOS['TO']]
 			server = smtplib.SMTP('mail.imagicair.cl:587')
 			server.starttls()
 			server.login(msg['From'], password)
@@ -123,11 +114,11 @@ def enviarCorreoRevision(cantidadArchivos, patrimonio, fecha_corte):
 		'clientes_duplicados_TC_PAT-%s_FCORTE-%s' % (patrimonio, fecha_corte),
 	)
 
-	asunto = 'Revision de DATA para el proceso FIP_EJEC_DIARIO PATRIMONIO: %s FECHA DE CORTE: %s' % (patrimonio, fecha_corte)
-	password = "satelite01"
+	asunto = 'Validación FIP_EJEC_DIARIO PATRIMONIO: %s FECHA DE CORTE: %s' % (patrimonio, fecha_corte)
+	password = CORREOS['PASSWD']
 	msg = MIMEMultipart()
-	msg['To'] = 'sop01@imagicair.cl'
-	msg['From'] = 'sop01@imagicair.cl'
+	msg['To'] = CORREOS['TO']
+	msg['From'] = CORREOS['FROM']
 	msg['Subject'] = asunto
 	envio = datetime.datetime.now()
 	mensaje = '<h2 style="color: #2b2301;">Instrucciones para realizar correcciones de inconsistencias encontradas:</h2>'

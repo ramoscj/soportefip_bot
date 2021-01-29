@@ -2,22 +2,21 @@ import discord
 from discord.ext import commands
 
 import datetime, time
-import asyncio
 import subprocess
 
 from csv_file import crear_csv, crear_xls
 from script_sql import ScriptSQL
 from enviar_correo import Correo
 from embed_mensajes import Mensaje
+from conexion_db import insertarConsulta
 
 from acceso_db import conexion
-from bot_token import TOKEN
 
 from consultas import Respaldo
 from respaldo_revisiones import RespaldoRev
 from reports_revisiones import ReportsRev
 
-from config_bot import PATRIMONIOS_TC, ENTORNO_FIP, ENTORNO_REPORTS
+from config_bot import PATRIMONIOS_TC, ENTORNO_FIP, ENTORNO_REPORTS, TOKEN_BOT
 
 bot = commands.Bot(command_prefix='>')
 
@@ -65,6 +64,10 @@ async def on_command_error(ctx, error):
 async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 	registrosRespaldo = []
 	nota = False
+	fechaProceso = datetime.datetime.now()
+	horaInicioProceso = fechaProceso.strftime('%H:%M:%S')
+	errorProceso = 0
+	envioScript = 0
 	await ctx.channel.send(':regional_indicator_i::regional_indicator_n::regional_indicator_i::regional_indicator_c::regional_indicator_i::regional_indicator_o:  -> PATRIMONIO: %s FECHA_CORTE: %s, porfavor espere...' % (patrimonio, fecha_corte))
 	try:
 		conexionDB = conexion()
@@ -119,6 +122,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			# Bloque para agregar las inconsistencias a la salida por pantalla
 			for i in range(0, len(erroresEncontrados)):
 				if erroresEncontrados[i] > 0:
+					errorProceso = 1
 					embed.add_field(name= ':x: %s' % mensajeValidacion[i], value= str(erroresEncontrados[i]), inline= False)
 					embed.title = ':thinking: Carga completa pero con inconsistencias encontradas :thumbsdown:'
 					embed.color = discord.Color.red()
@@ -127,6 +131,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 						if ScriptSQL.crear(i, patrimonio, fecha_corte, erroresEncontrados[i]):
 							archivo_sql += 1
 							archivoSqlAdjunto.append(i)
+							envioScript = 1
 					else:
 						error = 'El Patrimonio: %s fecha de corte: %s tiene una ejeucion en el SATELITE.' % (patrimonio, fecha_corte)
 						recomendaciones = 'Si no reconoce esta ejeucion y desea realizar una nueva favor informar al correo: sop01@imagicair.cl y solicite script para realizar el borrado del proceso existente.'
@@ -143,6 +148,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 				respuesta_embed = 'Se envio un correo a la direccion: :incoming_envelope: %s con %s archivo .XLSX y %s scripts .SQL con las indicaciones para realizar las correcciones.' % (repuesta, str(archivo_xls), str(archivo_sql))
 				embed.add_field(name='NOTA', value=respuesta_embed, inline=False)
 		else:
+			errorProceso = 1
 			dblink_reports = ENTORNO_REPORTS['DBLINK']
 			await ctx.channel.send(':x: No existen registros para el patrimonio: ' + str(patrimonio) + ' fecha de corte: ' + fecha_corte)
 			embed.title = ':dizzy_face: Carga de la información para realizar revisón INCOMPLETA :thumbsdown:'
@@ -175,6 +181,12 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 			embed.add_field(name=':loudspeaker: RECOMENDACIONES', value=recomendado, inline=False)
 			embed.add_field(name=':memo: NOTA', value=nota_msj, inline=False)
 		await ctx.send(embed=embed)
+
+		# Insertar registro de consulta en la DB
+		horaFinProceso = datetime.datetime.now()
+		data = {'FECHA_CONSULTA': fechaProceso.strftime("%d/%m/%Y"), 'PATRIMONIO': patrimonio, 'FECHA_CORTE': fecha_corte, 'HORA_INICIO': horaInicioProceso, 'HORA_FIN': horaFinProceso.strftime("%H:%M:%S"), 'ERROR': errorProceso, 'ENVIO_SCRIPT': envioScript}
+		insertarConsulta(data)
+
 	except Exception as e:
 		embed = discord.Embed(
 				title='Error no manejado :person_facepalming:',
@@ -216,5 +228,5 @@ async def vpnDeactiveLinux(ctx):
 	except Exception as e:
 		await ctx.send('Error VPN: %s' % e)
 
-bot.run(TOKEN())
+bot.run(TOKEN_BOT)
 
