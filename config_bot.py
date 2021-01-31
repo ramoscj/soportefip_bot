@@ -1,7 +1,7 @@
 import os
 import platform
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     ACCESO_DB = {
