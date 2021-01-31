@@ -184,7 +184,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 
 		# Insertar registro de consulta en la DB
 		horaFinProceso = datetime.datetime.now()
-		data = {'FECHA_CONSULTA': fechaProceso.strftime("%d/%m/%Y"), 'PATRIMONIO': patrimonio, 'FECHA_CORTE': fecha_corte, 'HORA_INICIO': horaInicioProceso, 'HORA_FIN': horaFinProceso.strftime("%H:%M:%S"), 'ERROR': errorProceso, 'ENVIO_SCRIPT': envioScript}
+		data = {'FECHA_CONSULTA': fechaProceso.date(), 'PATRIMONIO': patrimonio, 'FECHA_CORTE': fecha_corte, 'HORA_INICIO': horaInicioProceso, 'HORA_FIN': horaFinProceso.strftime("%H:%M:%S"), 'ERROR': errorProceso, 'ENVIO_SCRIPT': envioScript}
 		insertarConsulta(data)
 
 	except Exception as e:
