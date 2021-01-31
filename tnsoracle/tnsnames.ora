@@ -1,0 +1,11 @@
+NOVA.DIN.CL=
+  (DESCRIPTION=
+    (ADDRESS=
+      (PROTOCOL=TCP)
+      (HOST=192.168.50.104)
+      (PORT=1526)
+    )
+    (CONNECT_DATA=
+      (SID=nova)
+    )
+  )
