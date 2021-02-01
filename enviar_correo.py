@@ -8,6 +8,7 @@ import platform
 
 import smtplib, os
 import datetime
+import pytz
 
 from config_bot import PAT_BOT, CORREOS
 
@@ -40,7 +41,8 @@ class Correo(object):
 		msg['From'] = CORREOS['FROM']
 		msg['Cc'] = agregados
 		msg['Subject'] = asunto
-		envio = datetime.datetime.now()
+		tz = pytz.timezone('America/Santiago')
+		envio = datetime.datetime.now(tz=tz)
 		mensaje = '<h2 style="color: #2b2301;">Instrucciones para realizar correcciones de inconsistencias encontradas:</h2>'
 		mensaje += '<p>Para el patrimonio %s y fecha de corte %s se encontraron las siguientes inconsistencias:' % (patrimonio, fecha_corte)
 		mensaje += '<ol style="line-height: 32px; list-style-type: square;">'

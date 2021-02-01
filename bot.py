@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 import datetime, time
+import pytz
 import subprocess
 
 from csv_file import crear_csv, crear_xls
@@ -64,7 +65,8 @@ async def on_command_error(ctx, error):
 async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 	registrosRespaldo = []
 	nota = False
-	fechaProceso = datetime.datetime.now()
+	tz = pytz.timezone('America/Santiago')
+	fechaProceso = datetime.datetime.now(tz=tz)
 	horaInicioProceso = fechaProceso.strftime('%H:%M:%S')
 	errorProceso = 0
 	envioScript = 0
@@ -77,7 +79,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 		embed = discord.Embed(
 					title=':hugging: Carga correcta y sin inconsistencias encontradas :thumbsup:',
 					description="Este es el resumen de las validaciones realizadas para el patrimonio: %s y fecha de corte: %s" % (patrimonio, fecha_corte),
-					timestamp=datetime.datetime.utcnow(),
+					timestamp=fechaProceso,
 					color=discord.Color.green()
 				)
 		# Consultas SQL y texto para seguimiento
@@ -183,7 +185,7 @@ async def revision_proceso_diario(ctx, patrimonio: int, fecha_corte: str):
 		await ctx.send(embed=embed)
 
 		# Insertar registro de consulta en la DB
-		horaFinProceso = datetime.datetime.now()
+		horaFinProceso = datetime.datetime.now(tz=tz)
 		data = {'FECHA_CONSULTA': fechaProceso.date(), 'PATRIMONIO': patrimonio, 'FECHA_CORTE': fecha_corte, 'HORA_INICIO': horaInicioProceso, 'HORA_FIN': horaFinProceso.strftime("%H:%M:%S"), 'ERROR': errorProceso, 'ENVIO_SCRIPT': envioScript}
 		insertarConsulta(data)
 
