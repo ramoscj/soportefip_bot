@@ -120,7 +120,7 @@ class Respaldo(object):
 		return consulta
 
 	def validarNegociosSinCuenta():
-		consulta = "SELECT DISTINCT count(num_cta_credito) FROM fip.fip_diario_negocios fn WHERE fn.fecha_corte = to_date(:fecha_consulta, 'ddmmyyyy') AND fn.codigo_patrimonio = :pat_consulta AND NOT EXISTS (SELECT 1 fip.fip_cuenta_credito_ic cc WHERE fn.num_cta_credito = cc.cta_num_cta_credito AND fn.cod_cliente = cc.cta_cod_cliente AND fn.cod_empresa = cc.cta_cod_empresa AND group by fn.num_cta_credito)"
+		consulta = "SELECT DISTINCT count(num_cta_credito) FROM fip.fip_diario_negocios fn WHERE fn.fecha_corte = to_date(:fecha_consulta, 'ddmmyyyy') AND fn.codigo_patrimonio = :pat_consulta AND NOT EXISTS (SELECT 1 FROM fip.fip_cuenta_credito_ic cc WHERE fn.num_cta_credito = cc.cta_num_cta_credito AND fn.cod_cliente = cc.cta_cod_cliente AND fn.cod_empresa = cc.cta_cod_empresa AND group by fn.num_cta_credito)"
 		return consulta
 
 	def validarClienteDuplicadoTc():
@@ -162,7 +162,7 @@ class Respaldo(object):
 		return consulta
 
 	def detalle_NegocioSinCuenta():
-		consulta = "SELECT DISTINCT num_cta_credito FROM fip.fip_diario_negocios fn WHERE fn.fecha_corte = to_date(:fecha_consulta, 'ddmmyyyy') AND fn.codigo_patrimonio = :pat_consulta AND NOT EXISTS (SELECT 1 fip.fip_cuenta_credito_ic cc WHERE fn.num_cta_credito = cc.cta_num_cta_credito AND fn.cod_cliente = cc.cta_cod_cliente AND fn.cod_empresa = cc.cta_cod_empresa AND group by fn.num_cta_credito)"
+		consulta = "SELECT DISTINCT num_cta_credito FROM fip.fip_diario_negocios fn WHERE fn.fecha_corte = to_date(:fecha_consulta, 'ddmmyyyy') AND fn.codigo_patrimonio = :pat_consulta AND NOT EXISTS (SELECT 1 FROM fip.fip_cuenta_credito_ic cc WHERE fn.num_cta_credito = cc.cta_num_cta_credito AND fn.cod_cliente = cc.cta_cod_cliente AND fn.cod_empresa = cc.cta_cod_empresa AND group by fn.num_cta_credito)"
 		return consulta
 
 	#  CLIENTES DUPLICADOS *********************************
