@@ -1,7 +1,7 @@
 import os
 import platform
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     if os.environ.get('SERVIDOR_DB') is None:

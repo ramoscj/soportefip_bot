@@ -25,8 +25,8 @@ class Correo(object):
 				'<strong>Numero de Negocio en NULL</strong>',
 				'<strong>Movimientos ExtraFin sin Cuotas</strong>',
 				'<strong>Movimientos sin Cuotas</strong>',
-				'<strong>Negocios Sin Cuenta</strong>: Para realzar la corrección de este punto enviar un correo a <strong>sop01@imagicair.cl</strong> indicando la revision de este punto',
-				'<strong>Clientes Duplicados en TC</strong>: Para realzar la corrección de este punto enviar un correo a <strong>sop01@imagicair.cl</strong> indicando la revision de este punto'
+				'<strong>Negocios Sin Cuenta</strong>: Para realizar la corrección de este punto enviar un correo a <strong>sop01@imagicair.cl</strong> indicando la revision de este punto.',
+				'<strong>Clientes Duplicados en TC</strong>: Para realizar la corrección de este punto enviar un correo a <strong>sop01@imagicair.cl</strong> indicando la revision de este punto.'
 			),
 			(
 				'<strong>Remesas no estan generadas en la interfaz del Reports</strong>',

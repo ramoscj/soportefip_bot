@@ -25,8 +25,8 @@ class RespaldoRev(object):
 			Respaldo.validarNroNegociosNull(entorno, dblink),
 			Respaldo.validarMovSinCuotaExtra(entorno, dblink),
 			Respaldo.validarMovSinCuota(entorno, dblink),
-			Respaldo.count_remesas(entorno, dblink),
-			# Respaldo.validarNegociosSinCuenta(),
+			# Respaldo.count_remesas(entorno, dblink),
+			Respaldo.validarNegociosSinCuenta(),
 			Respaldo.validarClienteDuplicadoTc(),
 			Respaldo.validarProcesoExistente()
 		)
@@ -51,7 +51,6 @@ class RespaldoRev(object):
 				Respaldo.detalle_clienteFipNegocios(),
 				Respaldo.detalle_clienteFipCuentaCredito()
 				# Respaldo.remesas_cantidad(entorno, dblink),
-				# Respaldo.remesas_cantidad(entorno, dblink)
 			]
 		)
 		estado = ('NEG_NULL', 'NEG_DUPLICADOS', 'CUO_DUPLICADAS', 'CUO_SNEGOCIO', 'NRO_NEGNULL', 'MOVEXTRA_SCUOTA', 'MOV_SCUOTA', 'NEG_SIN_CUENTA', 'CLIENTE_DUP_TC')

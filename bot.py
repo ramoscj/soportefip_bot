@@ -202,16 +202,6 @@ async def test(ctx):
 	await ctx.send('Hola estoy aqui!!')
 
 @bot.command()
-async def vpn_active(ctx):
-	try:
-		programa = 'vpncli.exe'
-		parametros = 'my_key.dat'
-		cp = subprocess.run(['C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\%s' % programa, '-s', '<', '..\..\%s' % parametros], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-		await ctx.send('Conectando VPN: %s - %s' % (cp.stdout, cp.stderr))
-	except Exception as e:
-		raise e
-
-@bot.command()
 async def vpnActiveLinux(ctx):
 	try:
 		cp = subprocess.run('sudo bash /usr/bin/start_vpn.sh', shell=True)
