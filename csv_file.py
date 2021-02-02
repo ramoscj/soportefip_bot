@@ -62,8 +62,6 @@ def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
             worksheet = workbook.add_worksheet('%s' % mensaje[revisiones[i]])
             # Ingresando el titulo de cada hoja
             worksheet.merge_range('A1:F1', '%s' % titulos[revisiones[i]], bold)
-            # Inmovilizar paneles
-            # worksheet.freeze_panes('A2')
             # Ajustar ancho de columnas
             with conexion_db.cursor() as cursor:
                 if revisiones[i] == 8:
