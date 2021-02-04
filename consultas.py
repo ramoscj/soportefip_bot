@@ -120,7 +120,7 @@ class Respaldo(object):
 		return consulta
 
 	def validarNegociosSinCuenta():
-		consulta = "SELECT DISTINCT count(num_cta_credito) FROM fip.fip_diario_negocios fn WHERE fn.fecha_corte = to_date(:fecha_consulta, 'ddmmyyyy') AND fn.codigo_patrimonio = :pat_consulta AND NOT EXISTS (SELECT 1 FROM fip.fip_cuenta_credito_ic cc WHERE fn.num_cta_credito = cc.cta_num_cta_credito AND fn.cod_cliente = cc.cta_cod_cliente AND fn.cod_empresa = cc.cta_cod_empresa group by fn.num_cta_credito)"
+		consulta = "SELECT DISTINCT COUNT(num_cta_credito) FROM fip.fip_diario_negocios fn WHERE fn.fecha_corte = TO_DATE(:fecha_consulta, 'ddmmyyyy') AND fn.codigo_patrimonio = :pat_consulta AND NOT EXISTS (SELECT 1 FROM fip.fip_cuenta_credito_ic cc WHERE fn.num_cta_credito = cc.cta_num_cta_credito AND fn.cod_cliente = cc.cta_cod_cliente AND fn.cod_empresa = cc.cta_cod_empresa GROUP BY fn.num_cta_credito ) AND NOT EXISTS (select 1 from tc_cambioprod_enc a, tc_cuenta_credito b where a.fec_estado between TO_DATE(:fecha_consulta, 'ddmmyyyy') and TO_DATE(:fecha_consulta, 'ddmmyyyy') + .99999 and a.ind_estado = 'F'and b.num_cta_credito = a.num_cta_credito and b.cod_empresa = a.cod_empresa and EXISTS (SELECT 1 FROM fip.Fip_Patrimonios fp, fip.Fip_Cartera_Clasificada fn WHERE fp.empresa = a.Cod_Empresa AND fp.estado_patrimonio = 'A' AND fn.codigo_patrimonio = fp.codigo_patrimonio AND fn.CODIGO_CLIENTE = b.Cod_Cliente and fp.codigo_patrimonio_ic = :pat_consulta ) group by a.NUM_CTA_IC, b.COD_CLIENTE, b.COD_EMPRESA, b.fec_inclusion, a.fec_estado )"
 		return consulta
 
 	def validarClienteDuplicadoTc():
@@ -162,7 +162,7 @@ class Respaldo(object):
 		return consulta
 
 	def detalle_NegocioSinCuenta():
-		consulta = "SELECT DISTINCT num_cta_credito FROM fip.fip_diario_negocios fn WHERE fn.fecha_corte = to_date(:fecha_consulta, 'ddmmyyyy') AND fn.codigo_patrimonio = :pat_consulta AND NOT EXISTS (SELECT 1 FROM fip.fip_cuenta_credito_ic cc WHERE fn.num_cta_credito = cc.cta_num_cta_credito AND fn.cod_cliente = cc.cta_cod_cliente AND fn.cod_empresa = cc.cta_cod_empresa group by fn.num_cta_credito)"
+		consulta = "SELECT DISTINCT num_cta_credito FROM fip.fip_diario_negocios fn WHERE fn.fecha_corte = TO_DATE(:fecha_consulta, 'ddmmyyyy') AND fn.codigo_patrimonio = :pat_consulta AND NOT EXISTS (SELECT 1 FROM fip.fip_cuenta_credito_ic cc WHERE fn.num_cta_credito = cc.cta_num_cta_credito AND fn.cod_cliente = cc.cta_cod_cliente AND fn.cod_empresa = cc.cta_cod_empresa GROUP BY fn.num_cta_credito ) AND NOT EXISTS (select 1 from tc_cambioprod_enc a, tc_cuenta_credito b where a.fec_estado between TO_DATE(:fecha_consulta, 'ddmmyyyy') and TO_DATE(:fecha_consulta, 'ddmmyyyy') + .99999 and a.ind_estado = 'F'and b.num_cta_credito = a.num_cta_credito and b.cod_empresa = a.cod_empresa and EXISTS (SELECT 1 FROM fip.Fip_Patrimonios fp, fip.Fip_Cartera_Clasificada fn WHERE fp.empresa = a.Cod_Empresa AND fp.estado_patrimonio = 'A' AND fn.codigo_patrimonio = fp.codigo_patrimonio AND fn.CODIGO_CLIENTE = b.Cod_Cliente and fp.codigo_patrimonio_ic = :pat_consulta ) group by a.NUM_CTA_IC, b.COD_CLIENTE, b.COD_EMPRESA, b.fec_inclusion, a.fec_estado )"
 		return consulta
 
 	#  CLIENTES DUPLICADOS *********************************

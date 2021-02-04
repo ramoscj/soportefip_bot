@@ -5,7 +5,7 @@ import datetime, time
 import pytz
 import subprocess
 
-from csv_file import crear_csv, crear_xls
+from csv_file import crear_xls
 from script_sql import ScriptSQL
 from enviar_correo import Correo
 from embed_mensajes import Mensaje

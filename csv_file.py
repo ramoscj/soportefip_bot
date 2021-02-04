@@ -11,19 +11,6 @@ from acceso_db import conexion
 
 from config_bot import PATRIMONIOS_TC, PAT_BOT
 
-def crear_csv(nombre_archivo, registros:[]):
-    archivo = 'csv_data/%s.csv' % (str(nombre_archivo))
-    encabezado = [('NUM_CTA_CREDITO', 'COD_CLIENTE', 'COD_EXTRAFIN', 'FECHA_CORTE', 'TIPO_DOCUMENTO')]
-    try:
-        with open(archivo, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter=';')
-            writer.writerows(encabezado)
-            for x in registros:
-                writer.writerows(x)
-        return True
-    except Exception as e:
-        return ("Error: el csv: %s no pudo crearse. %s" % (nombre_archivo, e))
-
 def crear_xls(patrimonio, fecha_corte, revisiones:[], consultas:(), mensaje:()):
 
     nombre_archivo = 'INCONSISTENCIAS_PAT-%s_FCORT-%s' % (patrimonio, fecha_corte)
